@@ -42,6 +42,7 @@ BWQ.MAP_ZONES = {
 		[2255] = { id = 2255, name = C_Map.GetMapInfo(2255).name, quests = {}, buttons = {}, }, -- Azj-Kahet 11.0
 		[2213] = { id = 2213, name = C_Map.GetMapInfo(2213).name, quests = {}, buttons = {}, }, -- City of Threads 11.0
 		[2369] = { id = 2369, name = C_Map.GetMapInfo(2369).name, quests = {}, buttons = {}, }, -- Siren Isle 11.0.7
+		[2346] = { id = 2346, name = C_Map.GetMapInfo(2346).name, quests = {}, buttons = {}, }, -- Undermine 11.1.0
 	},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = {
 		[2022] = { id = 2022, name = C_Map.GetMapInfo(2022).name, quests = {}, buttons = {}, }, -- The Waking Shores 10.0
@@ -93,7 +94,7 @@ BWQ.MAP_ZONES = {
 -- The following table is used to sort the zones when displayed. This table should only include zones that are in the 
 -- BWQ.MAP_ZONES table above.
 BWQ.MAP_ZONES_SORT = {
-	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369									},
+	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369, 2346							},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 	{	2022, 2023, 2024, 2025, 2085, 2151, 2133, 2200						},
 	[CONSTANTS.EXPANSIONS.SHADOWLANDS] =  	{	1525, 1533, 1536, 1565, 1543, 1970									},
 	[CONSTANTS.EXPANSIONS.BFA] = 			{	1530, 1527, 1355, 1462, 62, 14, 863, 864, 862, 895, 942, 896, 1161	},
