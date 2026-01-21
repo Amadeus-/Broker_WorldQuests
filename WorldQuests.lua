@@ -25,8 +25,7 @@ function BWQ:WorldQuestsUnlocked()
 				or (BWQ.expansion == CONSTANTS.EXPANSIONS.BFA and UnitLevel("player") >= 50 and
 					(C_QuestLog.IsQuestFlaggedCompleted(51916) or C_QuestLog.IsQuestFlaggedCompleted(52451) -- horde
 					or C_QuestLog.IsQuestFlaggedCompleted(51918) or C_QuestLog.IsQuestFlaggedCompleted(52450))) -- alliance
-				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and UnitLevel("player") >= 45 and
-					(C_QuestLog.IsQuestFlaggedCompleted(43341) or C_QuestLog.IsQuestFlaggedCompleted(45727))) -- broken isles
+				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and (UnitLevel("player") >= 45 or (PlayerIsTimerunning() and PlayerGetTimerunningSeasonID() == 2 and UnitLevel("player") >= 30) and C_QuestLog.IsQuestFlaggedCompleted(41694))) -- broken isles
 		end
 	end
 
