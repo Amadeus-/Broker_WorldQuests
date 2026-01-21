@@ -1,3 +1,7 @@
+### 11.2.5.0
+* Added support for the "raid" world quest icon in Broken Isles
+* Updated TOC for 11.2.5
+
 ### 11.2.0.0
 * Added support for K'aresh (TWW)
 * Added support for Tazavesh (TWW)
