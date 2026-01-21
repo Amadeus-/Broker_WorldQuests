@@ -1,5 +1,6 @@
 local _, addon = ...
 local CONSTANTS = addon.CONSTANTS
+local GetQuestObjectiveInfo = C_QuestLog and C_QuestLog.GetQuestObjectiveInfo or GetQuestObjectiveInfo
 --==========================================================
 -- Bounties
 --==========================================================
@@ -115,7 +116,15 @@ function BWQ:ShowBountyTooltip(button, questID)
 	if title then
 		GameTooltip:SetOwner(button, "ANCHOR_BOTTOM")
 		GameTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB())
-		local _, questDescription = GetQuestLogQuestText(questIndex)
+
+		local questDescription
+		if C_QuestLog.GetQuestText then
+			local textInfo = C_QuestLog.GetQuestText(questIndex)
+			questDescription = textInfo and textInfo.description
+		else
+			_, questDescription = GetQuestLogQuestText(questIndex)
+		end
+
 		GameTooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 	
 		local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questID, 1, false)

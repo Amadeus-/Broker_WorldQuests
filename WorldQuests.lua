@@ -91,7 +91,8 @@ end
 function BWQ:GetArtifactPowerValue(itemId)
 	local millionSearchLocalized = { enUS = "million", enGB = "million", zhCN = "万", frFR = "million", deDE = "Million", esES = "mill", itIT = "milion", koKR = "만", esMX = "mill", ptBR = "milh", ruRU = "млн", zhTW = "萬", }
 	local billionSearchLocalized = { enUS = "billion", enGB = "billion", zhCN = "亿", frFR = "milliard", deDE = "Milliarde", esES = "mil millones", itIT = "miliard", koKR = "억", esMX = "mil millones", ptBR = "bilh", ruRU = "млрд", zhTW = "億", }
-	local _, itemLink = GetItemInfo(itemId)
+	local itemInfo = C_Item.GetItemInfo(itemId)
+	local itemLink = itemInfo and itemInfo.itemLink
 	BWQ.ScanTooltip:SetOwner(BWQ, "ANCHOR_NONE")
 	BWQ.ScanTooltip:SetHyperlink(itemLink)
 	local numLines = BWQ.ScanTooltip:NumLines()
@@ -199,7 +200,7 @@ local ShowWorldQuestPOITooltip = function(button,poi)
 end
 
 function BWQ:QueryZoneQuestCoordinates(mapId)
-	local quests = C_TaskQuest.GetQuestsForPlayerByMapID(mapId)
+	local quests = C_TaskQuest.GetQuestsOnMap(mapId)
 	if quests then
 		for _, v in next, quests do
 			local quest = BWQ.MAP_ZONES[BWQ.expansion][mapId].quests[v.questID] 
@@ -257,7 +258,7 @@ local DebugRetrieveWQ = false
 local RetrieveWorldQuests = function(mapId)
 	local numQuests = 0
 	local currentTime = GetTime()
-	local questList = C_TaskQuest.GetQuestsForPlayerByMapID(mapId)
+	local questList = C_TaskQuest.GetQuestsOnMap(mapId)
 	BWQ.warmodeEnabled = C_PvP.IsWarModeDesired()
 
 	if questList then
@@ -298,7 +299,7 @@ local RetrieveWorldQuests = function(mapId)
 					quest.hide = true
 					quest.sort = 0
 
-					-- C_TaskQuest.GetQuestsForPlayerByMapID fields
+					-- C_TaskQuest.GetQuestsOnMap fields
 					quest.questID = questID
 					quest.numObjectives = q.numObjectives
 					quest.xFlight = q.x
@@ -335,7 +336,16 @@ local RetrieveWorldQuests = function(mapId)
 							quest.reward.itemName = itemName
 							--print(string.format("[BWQ] Quest %s - %s - %s - %s - %s", quest.questID, quest.title, itemName, itemId, quantity))    -- for debugging
 							
-							local _, _, _, _, _, _, _, _, equipSlot, _, _, classId, subClassId = GetItemInfo(quest.reward.itemId)
+							local equipSlot, classId, subClassId
+							local itemInfo = C_Item.GetItemInfo(quest.reward.itemId)
+							if not itemInfo then
+								C_Item.RequestLoadItemDataByID(quest.reward.itemId)
+								return  -- wait for item data event
+							end
+							equipSlot  = itemInfo.itemEquipLoc
+							classId    = itemInfo.classID
+							subClassId = itemInfo.subclassID
+
 							if classId == 7 then
 								quest.sort = quest.sort > CONSTANTS.SORT_ORDER.PROFESSION and quest.sort or CONSTANTS.SORT_ORDER.PROFESSION
 								if quest.reward.itemId == 124124 then
