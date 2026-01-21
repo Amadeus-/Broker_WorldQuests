@@ -1,3 +1,6 @@
+### 12.0.0.1
+* Migrated configuration menu from deprecated UIDropDownMenu to modern MenuUtil.CreateContextMenu API for WoW 12.0.1+ compatibility
+
 ### 12.0.0.0
 * Initial updates to support 12.0.0.0
 
