@@ -11,6 +11,25 @@ local CONSTANTS = addon.CONSTANTS
 --
 --]]----
 
+local function IsLegionInvasionActive()
+	local BROKEN_ISLES_MAP_ID = 619
+	local INVASION_ATLAS = "legioninvasion-map-icon-portal"
+	local pois = C_AreaPoiInfo.GetAreaPOIForMap(BROKEN_ISLES_MAP_ID)
+
+	if not pois then
+		return false
+	end
+
+	for _, poiID in ipairs(pois) do
+		local info = C_AreaPoiInfo.GetAreaPOIInfo(BROKEN_ISLES_MAP_ID, poiID)
+		--print(info.atlasName)
+		if info and info.atlasName == INVASION_ATLAS then
+			return true
+		end
+	end
+	return false
+end
+
 function BWQ:WorldQuestsUnlocked()
 	if not BWQ.hasUnlockedWorldQuests then
 		if (BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then
@@ -25,7 +44,8 @@ function BWQ:WorldQuestsUnlocked()
 				or (BWQ.expansion == CONSTANTS.EXPANSIONS.BFA and UnitLevel("player") >= 50 and
 					(C_QuestLog.IsQuestFlaggedCompleted(51916) or C_QuestLog.IsQuestFlaggedCompleted(52451) -- horde
 					or C_QuestLog.IsQuestFlaggedCompleted(51918) or C_QuestLog.IsQuestFlaggedCompleted(52450))) -- alliance
-				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and (UnitLevel("player") >= 45 or (PlayerIsTimerunning() and PlayerGetTimerunningSeasonID() == 2 and UnitLevel("player") >= 30) and C_QuestLog.IsQuestFlaggedCompleted(41694))) -- broken isles
+				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and (UnitLevel("player") >= 45 or (PlayerIsTimerunning() and PlayerGetTimerunningSeasonID() == 2 and UnitLevel("player") >= 30) and C_QuestLog.IsQuestFlaggedCompleted(41694)) or IsLegionInvasionActive()) -- broken isles
+			print("IsLegionInvasionActive: ", IsLegionInvasionActive())
 		end
 	end
 
