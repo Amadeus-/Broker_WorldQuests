@@ -30,6 +30,7 @@ BWQ:SetParagonFactionsByActiveExpansion()
 
 function BWQ:OnFactionUpdate(msg)
 	if BWQ:C("hideFactionParagonBars") then return end
+	if issecretvalue and issecretvalue(msg) then return end
 
 	msg = msg:gsub(" %(%+.*%)" ,"")
 	local faction = msg:match(factionIncreaseString1)
