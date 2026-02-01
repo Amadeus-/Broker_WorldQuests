@@ -1682,7 +1682,11 @@ end
 
 function BWQ:AttachToBlock(anchor)
 	if not BWQ:C("attachToWorldMap") or (BWQ:C("attachToWorldMap") and not WorldMapFrame:IsShown()) then
-		CloseDropDownMenus()
+		-- Close any open context menus (modern Menu API)
+		local openMenu = Menu and Menu.GetOpenMenu and Menu.GetOpenMenu()
+		if openMenu then
+			openMenu:Close()
+		end
 
 		BWQ.blockYPos = select(2, anchor:GetCenter())
 		BWQ.showDownwards = BWQ.blockYPos > UIParent:GetHeight() / 2
