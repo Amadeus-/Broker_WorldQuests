@@ -1,3 +1,7 @@
+### 12.0.0.2
+* Added support for Twighlight Highlands (Midnight Pre-patch)
+* Added support for Twilight's Blade Insignia currency
+
 ### 12.0.0.1
 * Migrated configuration menu from deprecated UIDropDownMenu to modern MenuUtil.CreateContextMenu API for WoW 12.0.1+ compatibility
 

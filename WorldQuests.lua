@@ -578,6 +578,10 @@ local RetrieveWorldQuests = function(mapId)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.WEATHERED_UNDERMINE_CREST
 									quest.reward.WeatheredUndermineCrestAmount = currency.amount
 									if BWQ:C("showWeatheredUndermineCrest") then quest.hide = false end
+								elseif currencyId == 3319 then -- Twilight's Blade Insignia
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.TWILIGHTS_BLADE_INSIGNIA
+									quest.reward.TwilightsBladeInsigniaAmount = currency.amount
+									if BWQ:C("showTwilightsBladeInsignia") then quest.hide = false end
 								elseif currencyId == 3108 then -- Carved Undermine Crest
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.CARVED_UNDERMINE_CREST
 									quest.reward.CarvedUndermineCrestAmount = currency.amount
@@ -830,6 +834,8 @@ local RetrieveWorldQuests = function(mapId)
 									BWQ.totalBronzeCelebrationToken = BWQ.totalBronzeCelebrationToken + quest.reward.BronzeCelebrationTokenAmount
 								elseif rtype == CONSTANTS.REWARD_TYPES.WEATHERED_UNDERMINE_CREST then
 									BWQ.totalWeatheredUndermineCrest = BWQ.totalWeatheredUndermineCrest + quest.reward.WeatheredUndermineCrestAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.TWILIGHTS_BLADE_INSIGNIA then
+									BWQ.totalTwilightsBladeInsignia = BWQ.totalTwilightsBladeInsignia + quest.reward.TwilightsBladeInsigniaAmount
 								elseif rtype == CONSTANTS.REWARD_TYPES.CARVED_UNDERMINE_CREST then
 									BWQ.totalCarvedUndermineCrest = BWQ.totalCarvedUndermineCrest + quest.reward.CarvedUndermineCrestAmount
 								elseif rtype == CONSTANTS.REWARD_TYPES.THE_CARTELS_OF_UNDERMINE then
@@ -1035,6 +1041,7 @@ function BWQ:UpdateQuestData()
 	BWQ.totalPolishedPetCharms, BWQ.totalCouncilofDornogal, BWQ.totalTheWeaver, BWQ.totalTheGeneral, BWQ.totalTheVizier = 0, 0, 0, 0, 0
 	BWQ.totalXP, BWQ.totalBronzeCelebrationToken, BWQ.totalWeatheredUndermineCrest, BWQ.totalCarvedUndermineCrest, BWQ.totalTheCartelsOfUndermine = 0, 0, 0, 0, 0
 	BWQ.totalTheBilgewaterCartel, BWQ.totalTheBlackwaterCartel, BWQ.totalTheSteamwheedleCartel, BWQ.totalTheVentureCompany, BWQ.totalWeatheredEtherealCrest = 0, 0, 0, 0, 0
+	BWQ.totalTwilightsBladeInsignia = 0
 
 	for mapId in next, BWQ.MAP_ZONES[BWQ.expansion] do
 		RetrieveWorldQuests(mapId)
@@ -1644,6 +1651,7 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheGeneral") 			and BWQ.totalTheGeneral > 0				then brokerString = string.format("%s|TInterface\\Icons\\ui_notoriety_thegeneral:16:16|t %d  ", brokerString, BWQ.totalTheGeneral) end
 		if BWQ:C("brokerShowTheVizier") 			and BWQ.totalTheVizier > 0				then brokerString = string.format("%s|TInterface\\Icons\\ui_notoriety_thevizier:16:16|t %d  ", brokerString, BWQ.totalTheVizier) end
 		if BWQ:C("brokerShowWeatheredUndermineCrest") and BWQ.totalWeatheredUndermineCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_undermine_weathered:16:16|t %d  ", brokerString, BWQ.totalWeatheredUndermineCrest) end
+		if BWQ:C("brokerShowTwilightsBladeInsignia") and BWQ.totalTwilightsBladeInsignia > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv12_twilight_-blade_cultist_insignia:16:16|t %d  ", brokerString, BWQ.totalTwilightsBladeInsignia) end
 		if BWQ:C("brokerShowCarvedUndermineCrest") 	and BWQ.totalCarvedUndermineCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_undermine_carved:16:16|t %d  ", brokerString, BWQ.totalCarvedUndermineCrest) end
 		if BWQ:C("brokerShowTheCartelsOfUndermine") and BWQ.totalTheCartelsOfUndermine > 0	then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfactions_rocket:16:16|t %d  ", brokerString, BWQ.totalTheCartelsOfUndermine) end
 		if BWQ:C("brokerShowTheBilgewaterCartel") 	and BWQ.totalTheBilgewaterCartel > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_1115_reputationcurrencies_bilgewater:16:16|t %d  ", brokerString, BWQ.totalTheBilgewaterCartel) end

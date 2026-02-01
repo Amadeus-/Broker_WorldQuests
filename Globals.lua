@@ -45,6 +45,7 @@ BWQ.MAP_ZONES = {
 		[2346] = { id = 2346, name = C_Map.GetMapInfo(2346).name, quests = {}, buttons = {}, }, -- Undermine 11.1.0
 		[2371] = { id = 2371, name = C_Map.GetMapInfo(2371).name, quests = {}, buttons = {}, }, -- K'aresh 11.2.0
 		[2472] = { id = 2472, name = C_Map.GetMapInfo(2472).name, quests = {}, buttons = {}, }, -- Tazavesh 11.2.0
+		[241]  = { id = 241,  name = C_Map.GetMapInfo(241).name,  quests = {}, buttons = {}, }, -- Twilight Highlands 12.0.0 (Midnight Prepatch)
 	},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = {
 		[2022] = { id = 2022, name = C_Map.GetMapInfo(2022).name, quests = {}, buttons = {}, }, -- The Waking Shores 10.0
@@ -96,7 +97,7 @@ BWQ.MAP_ZONES = {
 -- The following table is used to sort the zones when displayed. This table should only include zones that are in the 
 -- BWQ.MAP_ZONES table above.
 BWQ.MAP_ZONES_SORT = {
-	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369, 2346, 2371, 2472				},
+	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369, 2346, 2371, 2472, 241			},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 	{	2022, 2023, 2024, 2025, 2085, 2151, 2133, 2200						},
 	[CONSTANTS.EXPANSIONS.SHADOWLANDS] =  	{	1525, 1533, 1536, 1565, 1543, 1970									},
 	[CONSTANTS.EXPANSIONS.BFA] = 			{	1530, 1527, 1355, 1462, 62, 14, 863, 864, 862, 895, 942, 896, 1161	},
