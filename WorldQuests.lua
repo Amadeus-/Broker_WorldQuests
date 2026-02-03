@@ -260,10 +260,10 @@ local RetrieveWorldQuests = function(mapId)
 	local currentTime = GetTime()
 	local questList = C_TaskQuest.GetQuestsOnMap(mapId)
 	BWQ.warmodeEnabled = C_PvP.IsWarModeDesired()
+	BWQ.MAP_ZONES[BWQ.expansion][mapId].questsSort = {}
 
 	if questList then
 		numQuests = 0
-		BWQ.MAP_ZONES[BWQ.expansion][mapId].questsSort = {}
 
 		local timeLeft, questTagInfo, title, factionId
 		for i, q in ipairs(questList) do
