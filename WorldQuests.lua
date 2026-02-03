@@ -254,10 +254,21 @@ local Row_OnClick = function(row)
 end
 
 local DebugRetrieveWQ = false
+
 local RetrieveWorldQuests = function(mapId)
-	local numQuests = 0
-	local currentTime = GetTime()
-	local questList = C_TaskQuest.GetQuestsOnMap(mapId)
+    local numQuests = 0
+    local currentTime = GetTime()
+
+    -- Ensure table exists even if GetQuestsOnMap returns nil
+    local zone = BWQ.MAP_ZONES[BWQ.expansion] and BWQ.MAP_ZONES[BWQ.expansion][mapId]
+    if not zone then return end
+
+    zone.questsSort = zone.questsSort or {}
+    -- If you want a fresh rebuild each update, clear it:
+    wipe(zone.questsSort)
+
+    local questList = C_TaskQuest.GetQuestsOnMap(mapId)
+
 	BWQ.warmodeEnabled = C_PvP.IsWarModeDesired()
 
 	if questList then
