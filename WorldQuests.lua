@@ -30,10 +30,19 @@ local function IsLegionInvasionActive()
 	return false
 end
 
+
+local function TwilightHighlandWQsUnlocked()
+	-- "<Name>, Definitely Not a Cultist" is awarded at the end of the Midnight prepatch event intro quest chain, spanning "The Cult Within" to "Cult It Out" and unlocks WQ in Twilight Highlands for the warband for all character levels, lvl 1 Bloodelfes work, level 4 pandaren without allegiance don't.
+    local f = UnitFactionGroup("player")
+    return IsTitleKnown(643) and (f == "Alliance" or f == "Horde")
+end
+
+
+
 function BWQ:WorldQuestsUnlocked()
 	if not BWQ.hasUnlockedWorldQuests then
 		if (BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then
-			BWQ.hasUnlockedWorldQuests = C_QuestLog.IsQuestFlaggedCompleted(79573) -- See effect #1 under https://www.wowhead.com/spell=434027/world-quests-adventure-mode
+			BWQ.hasUnlockedWorldQuests = (C_QuestLog.IsQuestFlaggedCompleted(79573) or TwilightHighlandWQsUnlocked()) -- See effect #1 under https://www.wowhead.com/spell=434027/world-quests-adventure-mode
 		elseif (BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT) then
 			_, _, _, BWQ.hasUnlockedWorldQuests = GetAchievementInfo(16326)
 			if not BWQ.hasUnlockedWorldQuests then
