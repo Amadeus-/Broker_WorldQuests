@@ -178,6 +178,9 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Steamwheedle Cartel"):format("Interface\\Icons\\inv_1115_reputationcurrencies_steamwheedle"), check = "brokerShowTheSteamwheedleCartel" },
 					{ text = ("|T%1$s:16:16|t  The Venture Company"):format("Interface\\Icons\\inv_1115_reputationcurrencies_ventureco"), check = "brokerShowTheVentureCompany" },
 					{ text = ("|T%1$s:16:16|t  Weathered Ethereal Crest"):format("Interface\\Icons\\inv_crestupgrade_ethereal_weathered"), check = "brokerShowWeatheredEtherealCrest" },
+					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "brokerShowVoidlightMarl" },
+					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "brokerShowTheAmaniTribe" },
+					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "brokerShowTheSingularity" },
 				}
 			},
 			{ text = "Sort list by time remaining instead of reward type", check = "sortByTimeRemaining" },
@@ -197,6 +200,12 @@ function BWQ:OpenConfigMenu(anchor)
 			{ text = ("|T%1$s:16:16|t  Bloody Tokens"):format("Interface\\Icons\\inv_10_dungeonjewelry_titan_trinket_2_color2"), check = "showBloodyTokens" },
 			{ text = ("|T%1$s:16:16|t  Low gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showLowGold" },
 			{ text = ("|T%1$s:16:16|t  High gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showHighGold" },
+			{ text = "      Midnight", submenu = {
+					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "showVoidlightMarl" },
+					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "showTheAmaniTribe" },
+					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "showTheSingularity" },
+				}
+			},
 			{ text = "      The War Within", submenu = {
 					{ text = ("|T%1$s:16:16|t  Reputation Tokens"):format("Interface\\Icons\\inv_scroll_11"), check = "showTWWReputation" },
 					{ text = ("|T%s$s:16:16|t  Resonance Crystals"):format("Interface\\Icons\\spell_azerite_essence14"), check = "showResonanceCrystals" },
@@ -425,6 +434,9 @@ BWQ.defaultConfig = {
 		brokerShowTheSteamwheedleCartel = true,
 		brokerShowTheVentureCompany = true,
 		brokerShowWeatheredEtherealCrest = true,
+		brokerShowVoidlightMarl = true,
+		brokerShowTheAmaniTribe = true,
+		brokerShowTheSingularity = true,
 	sortByTimeRemaining = false,
 	showNEWTextWhenAppropriate = true,
 	-- reward type
@@ -464,6 +476,9 @@ BWQ.defaultConfig = {
 	showPrismaticManapearl = true,
 	showCyphersOfTheFirstOnes = true,
 	showGratefulOffering = true,
+	showVoidlightMarl = true,
+	showTheAmaniTribe = true,
+	showTheSingularity = true,
 	showItems = true,
 		showGear = true,
 		showRelics = true,

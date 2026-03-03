@@ -641,7 +641,19 @@ local RetrieveWorldQuests = function(mapId)
 								elseif currencyId == 3284 then -- Weathered Ethereal Crest
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.WEATHERED_ETHEREAL_CREST
 									quest.reward.WeatheredEtherealCrestAmount = currency.amount
-									if BWQ:C("showWeatheredEtherealCrest") then quest.hide = false end								
+									if BWQ:C("showWeatheredEtherealCrest") then quest.hide = false end			
+								elseif currencyId == 3316 then -- Voidlight Marl
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.VOIDLIGHT_MARL
+									quest.reward.VoidlightMarlAmount = currency.amount
+									if BWQ:C("showVoidlightMarl") then quest.hide = false end		
+								elseif currencyId == 3354 then -- The Amani Tribe
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.THE_AMANI_TRIBE
+									quest.reward.TheAmaniTribeAmount = currency.amount
+									if BWQ:C("showTheAmaniTribe") then quest.hide = false end		
+								elseif currencyId == 3389 then -- The Singularity
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.THE_SINGULARITY
+									quest.reward.TheSingularityAmount = currency.amount
+									if BWQ:C("showTheSingularity") then quest.hide = false end		
 								else 
 									if BWQcfg.spewDebugInfo then print(string.format("[BWQ] Unhandled currency: ID %s", currencyId)) end
 								end
@@ -881,6 +893,12 @@ local RetrieveWorldQuests = function(mapId)
 									BWQ.totalTheVentureCompany = BWQ.totalTheVentureCompany + quest.reward.TheVentureCompanyAmount										
 								elseif rtype == CONSTANTS.REWARD_TYPES.WEATHERED_ETHEREAL_CREST then
 									BWQ.totalWeatheredEtherealCrest = BWQ.totalWeatheredEtherealCrest + quest.reward.WeatheredEtherealCrestAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.VOIDLIGHT_MARL then
+									BWQ.totalVoidlightMarl = BWQ.totalVoidlightMarl + quest.reward.VoidlightMarlAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.THE_AMANI_TRIBE then
+									BWQ.totalTheAmaniTribe = BWQ.totalTheAmaniTribe + quest.reward.TheAmaniTribeAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.THE_SINGULARITY then
+									BWQ.totalTheSingularity = BWQ.totalTheSingularity + quest.reward.TheSingularityAmount
 								end
 							end
 						end
@@ -1072,6 +1090,7 @@ function BWQ:UpdateQuestData()
 	BWQ.totalPolishedPetCharms, BWQ.totalCouncilofDornogal, BWQ.totalTheWeaver, BWQ.totalTheGeneral, BWQ.totalTheVizier = 0, 0, 0, 0, 0
 	BWQ.totalXP, BWQ.totalBronzeCelebrationToken, BWQ.totalWeatheredUndermineCrest, BWQ.totalCarvedUndermineCrest, BWQ.totalTheCartelsOfUndermine = 0, 0, 0, 0, 0
 	BWQ.totalTheBilgewaterCartel, BWQ.totalTheBlackwaterCartel, BWQ.totalTheSteamwheedleCartel, BWQ.totalTheVentureCompany, BWQ.totalWeatheredEtherealCrest = 0, 0, 0, 0, 0
+	BWQ.totalVoidlightMarl, BWQ.totalTheAmaniTribe, BWQ.totalTheSingularity = 0, 0, 0
 	BWQ.totalTwilightsBladeInsignia = 0
 
 	for mapId in next, BWQ.MAP_ZONES[BWQ.expansion] do
@@ -1691,6 +1710,9 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheSteamwheedleCartel") and BWQ.totalTheSteamwheedleCartel > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_1115_reputationcurrencies_steamwheedle:16:16|t %d  ", brokerString, BWQ.totalTheSteamwheedleCartel) end
 		if BWQ:C("brokerShowTheVentureCompany") 	and BWQ.totalTheVentureCompany > 0		then brokerString = string.format("%s|TInterface\\Icons\\inv_1115_reputationcurrencies_ventureco:16:16|t %d  ", brokerString, BWQ.totalTheVentureCompany) end
 		if BWQ:C("brokerShowWeatheredEtherealCrest") and BWQ.totalWeatheredEtherealCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_ethereal_weathered:16:16|t %d  ", brokerString, BWQ.totalWeatheredEtherealCrest) end
+		if BWQ:C("brokerShowVoidlightMarl") 		and BWQ.totalVoidlightMarl > 0			then brokerString = string.format("%s|TInterface\\Icons\\inv_112_raidtrinkets_voidprism:16:16|t %d  ", brokerString, BWQ.totalVoidlightMarl) end
+		if BWQ:C("brokerShowTheAmaniTribe") 		and BWQ.totalTheAmaniTribe > 0			then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-flames:16:16|t %d  ", brokerString, BWQ.totalTheAmaniTribe) end
+		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-sky:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
 
 		if brokerString and brokerString ~= "" then
 			BWQ.WorldQuestsBroker.text = brokerString
