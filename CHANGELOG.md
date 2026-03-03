@@ -1,3 +1,6 @@
+### 12.0.1.0
+* Fixed bounty tooltip crash during combat caused by secret value taint in 12.0.0+
+
 ### 12.0.0.2
 * Added support for Twighlight Highlands (Midnight Pre-patch)
 * Added support for Twilight's Blade Insignia currency
