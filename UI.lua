@@ -20,6 +20,17 @@ BWQ:Hide()
 --==========================================================
 -- Main Window Buttons
 --==========================================================
+BWQ.buttonMidnight = CreateFrame("Button", nil, BWQ, "BackdropTemplate")
+BWQ.buttonMidnight:SetSize(20, 15)
+BWQ.buttonMidnight:SetPoint("TOPRIGHT", BWQ, "TOPRIGHT", -173, -8)
+BWQ.buttonMidnight:SetBackdrop({bgFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = false, tileSize = 0, edgeSize = 2, insets = { left = 0, right = 0, top = 0, bottom = 0 }, })
+BWQ.buttonMidnight:SetBackdropColor(0.1, 0.1, 0.1)
+BWQ.buttonMidnight.texture = BWQ.buttonMidnight:CreateTexture(nil, "OVERLAY")
+BWQ.buttonMidnight.texture:SetPoint("TOPLEFT", 1, -1)
+BWQ.buttonMidnight.texture:SetPoint("BOTTOMRIGHT", -1, 1)
+BWQ.buttonMidnight.texture:SetTexture("Interface\\Calendar\\Holidays\\Calendar_Midnight")							-- Use https://github.com/Marlamin/wow.tools.local to find textures
+BWQ.buttonMidnight.texture:SetTexCoord(0.15, 0.55, 0.23, 0.47)
+
 BWQ.buttonTheWarWithin = CreateFrame("Button", nil, BWQ, "BackdropTemplate")
 BWQ.buttonTheWarWithin:SetSize(20, 15)
 BWQ.buttonTheWarWithin:SetPoint("TOPRIGHT", BWQ, "TOPRIGHT", -146, -8)
@@ -75,6 +86,7 @@ BWQ.buttonLegion.texture:SetPoint("BOTTOMRIGHT", -1, 1)
 BWQ.buttonLegion.texture:SetTexture("Interface\\Calendar\\Holidays\\Calendar_WeekendLegionStart")
 BWQ.buttonLegion.texture:SetTexCoord(0.15, 0.55, 0.23, 0.47)
 
+BWQ.buttonMidnight:SetScript("OnClick", function(self) BWQ:SwitchExpansion(CONSTANTS.EXPANSIONS.MIDNIGHT) end)
 BWQ.buttonTheWarWithin:SetScript("OnClick", function(self) BWQ:SwitchExpansion(CONSTANTS.EXPANSIONS.THEWARWITHIN) end)
 BWQ.buttonDragonflight:SetScript("OnClick", function(self) BWQ:SwitchExpansion(CONSTANTS.EXPANSIONS.DRAGONFLIGHT) end)
 BWQ.buttonShadowlands:SetScript("OnClick", function(self) BWQ:SwitchExpansion(CONSTANTS.EXPANSIONS.SHADOWLANDS) end)

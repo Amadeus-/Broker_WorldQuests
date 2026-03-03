@@ -6,7 +6,8 @@ CONSTANTS.EXPANSIONS = {
 	BFA = "BFA",
 	SHADOWLANDS = "SHADOWLANDS",
 	DRAGONFLIGHT = "DRAGONFLIGHT",
-	THEWARWITHIN = "THEWARWITHIN"
+	THEWARWITHIN = "THEWARWITHIN",
+	MIDNIGHT = "MIDNIGHT"
 }
 CONSTANTS.FACTIONS = {
 	NEUTRAL = 0,
@@ -147,6 +148,10 @@ CONSTANTS.CURRENCIES_AFFECTED_BY_WARMODE = {
 	[2123] = true, -- Bloody Tokens (dragonflight)
 }
 
+CONSTANTS.MIDNIGHT_REPUTATION_CURRENCY_IDS = {
+-- TODO
+}
+
 CONSTANTS.THEWARWITHIN_REPUTATION_CURRENCY_IDS = {
 	[2902] = true, -- The Assembly of the Deeps
 	[2899] = true, -- Hallowfall Arathi
@@ -214,6 +219,7 @@ CONSTANTS.FAMILY_FAMILIAR_QUEST_IDS = { -- WQ pet battle achievement
 
 CONSTANTS.ACHIEVEMENT_IDS = {
 	PET_BATTLE_WQ = {
+		[CONSTANTS.EXPANSIONS.MIDNIGHT] = 0,				-- there doesn't appear to be a pet battle achievement for Midnight?  Perhaps this functionality needs to be removed?
 		[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 40153,
 		[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 16464,
 		[CONSTANTS.EXPANSIONS.SHADOWLANDS] = 14625,
@@ -405,6 +411,9 @@ CONSTANTS.PARAGON_FACTIONS = {
 		order = {2902, 2899 },
 		[2902] = "ui_majorfactions_candle", -- The Assembly of the Deeps
 		[2899] = "ui_majorfactions_flame", -- Hallowfall Arathi
+	},
+	midnight = {
+		order = { },
 	},
 }
 

@@ -41,7 +41,9 @@ end
 
 function BWQ:WorldQuestsUnlocked()
 	if not BWQ.hasUnlockedWorldQuests then
-		if (BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then
+		if (BWQ.expansion == CONSTANTS.EXPANSIONS.MIDNIGHT) then
+			BWQ.hasUnlockedWorldQuests = (C_QuestLog.IsQuestFlaggedCompleted(90806)) -- See effect #1 under https://www.wowhead.com/spell=1234841/world-quests-adventure-mode
+		elseif (BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then
 			BWQ.hasUnlockedWorldQuests = (C_QuestLog.IsQuestFlaggedCompleted(79573) or TwilightHighlandWQsUnlocked()) -- See effect #1 under https://www.wowhead.com/spell=434027/world-quests-adventure-mode
 		elseif (BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT) then
 			_, _, _, BWQ.hasUnlockedWorldQuests = GetAchievementInfo(16326)
@@ -62,7 +64,9 @@ function BWQ:WorldQuestsUnlocked()
 		if not BWQ.errorFS then BWQ:CreateErrorFS() end
 
 		local level, quest, errorText
-		if BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN then
+		if BWQ.expansion == CONSTANTS.EXPANSIONS.MIDNIGHT then
+			errorText = "You need to unlock Midnight World Quests\non one of your characters."
+		elseif BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN then
 			errorText = "You need to unlock The War Within World Quests\non one of your characters."
 		elseif BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT then
 			errorText = "You need to unlock Dragonflight World Quests\non one of your characters."
@@ -105,7 +109,7 @@ function BWQ:ShowNoWorldQuestsInfo()
 end
 
 function BWQ:SetErrorFSPosition(offsetTop)
-	if (BWQ.expansion == CONSTANTS.EXPANSIONS.SHADOWLANDS or BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT or BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then  -- TODO:  We are not supporting bounty quests for these expansions atm, so the ErrorFS position should be at the top of BWQ
+	if (BWQ.expansion == CONSTANTS.EXPANSIONS.SHADOWLANDS or BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT or BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN or BWQ.expansion == CONSTANTS.EXPANSIONS.MIDNIGHT) then  -- TODO:  We are not supporting bounty quests for these expansions atm, so the ErrorFS position should be at the top of BWQ
 		BWQ.errorFS:SetPoint("TOP", BWQ, "TOP", 0, offsetTop)
 	else
 		if BWQ.factionDisplay:IsShown() then
@@ -686,7 +690,6 @@ local RetrieveWorldQuests = function(mapId)
 						quest.isMissingAchievementCriteria = BWQ:IsQuestAchievementCriteriaMissing(CONSTANTS.ACHIEVEMENT_IDS.PET_BATTLE_WQ[BWQ.expansion], quest.questID)
 					elseif quest.worldQuestType == Enum.QuestTagType.Profession then
 						if BWQ:C("showProfession") then
-
 							if quest.tagId == 119 then
 								questType[#questType+1] = CONSTANTS.QUEST_TYPES.HERBALISM
 								if BWQ:C("showProfessionHerbalism")	then quest.hide = false else quest.hide = true end
@@ -1210,6 +1213,7 @@ function BWQ:SwitchExpansion(expac)
 	end
 	BWQ:SetParagonFactionsByActiveExpansion()
 
+	BWQ.buttonMidnight:SetAlpha(expac == CONSTANTS.EXPANSIONS.MIDNIGHT and 1 or 0.4)
 	BWQ.buttonTheWarWithin:SetAlpha(expac == CONSTANTS.EXPANSIONS.THEWARWITHIN and 1 or 0.4)
 	BWQ.buttonDragonflight:SetAlpha(expac == CONSTANTS.EXPANSIONS.DRAGONFLIGHT and 1 or 0.4)
 	BWQ.buttonShadowlands:SetAlpha(expac == CONSTANTS.EXPANSIONS.SHADOWLANDS and 1 or 0.4)

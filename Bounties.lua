@@ -7,21 +7,8 @@ local GetQuestObjectiveInfo = C_QuestLog and C_QuestLog.GetQuestObjectiveInfo or
 BWQ.bountyCache = {}
 BWQ.bountyDisplay = CreateFrame("Frame", "BWQ_BountyDisplay", BWQ)
 function BWQ:UpdateBountyData()
-	if BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN then -- TODO: get map id for retrieving bounties
-		BWQ.bountyDisplay:Hide()
-		for i, item in pairs(BWQ.bountyCache) do
-			item.button:Hide()
-		end
-		return
-	end
-	if BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT then -- TODO: get map id for retrieving bounties
-		BWQ.bountyDisplay:Hide()
-		for i, item in pairs(BWQ.bountyCache) do
-			item.button:Hide()
-		end
-		return
-	end
-	if BWQ.expansion == CONSTANTS.EXPANSIONS.SHADOWLANDS then -- TODO: get map id for retrieving bounties
+	-- TODO: get map id for retrieving bounties
+	if (BWQ.expansion == CONSTANTS.EXPANSIONS.MIDNIGHT or BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN or BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT or BWQ.expansion == CONSTANTS.EXPANSIONS.SHADOWLANDS) then
 		BWQ.bountyDisplay:Hide()
 		for i, item in pairs(BWQ.bountyCache) do
 			item.button:Hide()

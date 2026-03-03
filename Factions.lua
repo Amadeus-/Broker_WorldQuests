@@ -14,7 +14,9 @@ local factionIncreaseString1 = FACTION_STANDING_INCREASED:gsub("%%d", "([0-9]+)"
 local factionIncreaseString2 = FACTION_STANDING_INCREASED_ACH_BONUS:gsub("%%d", "([0-9]+)"):gsub("%%s", "(.*)"):gsub(" %(%+.*%)" ,"")
 local factionIncreaseString3 = FACTION_STANDING_INCREASED_GENERIC:gsub("%%s", "(.*)"):gsub(" %(%+.*%)" ,"")
 function BWQ:SetParagonFactionsByActiveExpansion()
-	if BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN then 
+	if BWQ.expansion == CONSTANTS.EXPANSIONS.MIDNIGHT then 
+		paragonFactions = CONSTANTS.PARAGON_FACTIONS.midnight
+	elseif BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN then 
 		paragonFactions = CONSTANTS.PARAGON_FACTIONS.thewarwithin
 	elseif BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT then 
 		paragonFactions = CONSTANTS.PARAGON_FACTIONS.dragonflight
