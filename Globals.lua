@@ -36,7 +36,7 @@ BWQ.mapID = 0
 -- Also, see https://www.wowhead.com/guide/list-of-zone-ids-for-navigation-in-wow-and-tomtom-19501
 BWQ.MAP_ZONES = {
 	[CONSTANTS.EXPANSIONS.MIDNIGHT] = {
-		[2393] = { id = 2393, name = C_Map.GetMapInfo(2393).name, quests = {}, buttons = {}, }, -- Eversong Woods 12.0
+		[2395] = { id = 2395, name = C_Map.GetMapInfo(2395).name, quests = {}, buttons = {}, }, -- Eversong Woods 12.0
 		[2437] = { id = 2437, name = C_Map.GetMapInfo(2437).name, quests = {}, buttons = {}, }, -- Zul'Aman 12.0
 		[2413] = { id = 2413, name = C_Map.GetMapInfo(2413).name, quests = {}, buttons = {}, }, -- Harandar 12.0
 		[2405] = { id = 2405, name = C_Map.GetMapInfo(2405).name, quests = {}, buttons = {}, }, -- Voidstorm 12.0
@@ -103,7 +103,7 @@ BWQ.MAP_ZONES = {
 -- The following table is used to sort the zones when displayed. This table should only include zones that are in the 
 -- BWQ.MAP_ZONES table above.
 BWQ.MAP_ZONES_SORT = {
-	[CONSTANTS.EXPANSIONS.MIDNIGHT] = 		{	2393, 2437, 2413, 2405												},
+	[CONSTANTS.EXPANSIONS.MIDNIGHT] = 		{	2395, 2437, 2413, 2405												},
 	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369, 2346, 2371, 2472, 241			},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 	{	2022, 2023, 2024, 2025, 2085, 2151, 2133, 2200						},
 	[CONSTANTS.EXPANSIONS.SHADOWLANDS] =  	{	1525, 1533, 1536, 1565, 1543, 1970									},
