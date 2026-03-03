@@ -11,10 +11,38 @@ local CONSTANTS = addon.CONSTANTS
 --
 --]]----
 
+local function IsLegionInvasionActive()
+	local BROKEN_ISLES_MAP_ID = 619
+	local INVASION_ATLAS = "legioninvasion-map-icon-portal"
+	local pois = C_AreaPoiInfo.GetAreaPOIForMap(BROKEN_ISLES_MAP_ID)
+
+	if not pois then
+		return false
+	end
+
+	for _, poiID in ipairs(pois) do
+		local info = C_AreaPoiInfo.GetAreaPOIInfo(BROKEN_ISLES_MAP_ID, poiID)
+		--print(info.atlasName)
+		if info and info.atlasName == INVASION_ATLAS then
+			return true
+		end
+	end
+	return false
+end
+
+
+local function TwilightHighlandWQsUnlocked()
+	-- "<Name>, Definitely Not a Cultist" is awarded at the end of the Midnight prepatch event intro quest chain, spanning "The Cult Within" to "Cult It Out" and unlocks WQ in Twilight Highlands for the warband for all character levels, lvl 1 Bloodelfes work, level 4 pandaren without allegiance don't.
+    local f = UnitFactionGroup("player")
+    return IsTitleKnown(643) and (f == "Alliance" or f == "Horde")
+end
+
+
+
 function BWQ:WorldQuestsUnlocked()
 	if not BWQ.hasUnlockedWorldQuests then
 		if (BWQ.expansion == CONSTANTS.EXPANSIONS.THEWARWITHIN) then
-			BWQ.hasUnlockedWorldQuests = C_QuestLog.IsQuestFlaggedCompleted(79573) -- See effect #1 under https://www.wowhead.com/spell=434027/world-quests-adventure-mode
+			BWQ.hasUnlockedWorldQuests = (C_QuestLog.IsQuestFlaggedCompleted(79573) or TwilightHighlandWQsUnlocked()) -- See effect #1 under https://www.wowhead.com/spell=434027/world-quests-adventure-mode
 		elseif (BWQ.expansion == CONSTANTS.EXPANSIONS.DRAGONFLIGHT) then
 			_, _, _, BWQ.hasUnlockedWorldQuests = GetAchievementInfo(16326)
 			if not BWQ.hasUnlockedWorldQuests then
@@ -25,8 +53,8 @@ function BWQ:WorldQuestsUnlocked()
 				or (BWQ.expansion == CONSTANTS.EXPANSIONS.BFA and UnitLevel("player") >= 50 and
 					(C_QuestLog.IsQuestFlaggedCompleted(51916) or C_QuestLog.IsQuestFlaggedCompleted(52451) -- horde
 					or C_QuestLog.IsQuestFlaggedCompleted(51918) or C_QuestLog.IsQuestFlaggedCompleted(52450))) -- alliance
-				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and UnitLevel("player") >= 45 and
-					(C_QuestLog.IsQuestFlaggedCompleted(43341) or C_QuestLog.IsQuestFlaggedCompleted(45727))) -- broken isles
+				or (BWQ.expansion == CONSTANTS.EXPANSIONS.LEGION and (UnitLevel("player") >= 45 or (PlayerIsTimerunning() and PlayerGetTimerunningSeasonID() == 2 and UnitLevel("player") >= 30) and C_QuestLog.IsQuestFlaggedCompleted(41694)) or IsLegionInvasionActive()) -- broken isles
+			print("IsLegionInvasionActive: ", IsLegionInvasionActive())
 		end
 	end
 
