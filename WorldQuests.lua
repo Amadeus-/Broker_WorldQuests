@@ -204,7 +204,12 @@ local ShowQuestObjectiveTooltip = function(row)
 
 	local percent = C_TaskQuest.GetQuestProgressBarInfo(row.quest.questID)
 	if percent then
-		GameTooltip_ShowProgressBar(BWQ.tooltip, 0, 100, percent, PERCENTAGE_STRING:format(percent))
+		if InCombatLockdown() then
+			-- Text fallback: progress bar widget taints frame width measurements during combat
+			BWQ.tooltip:AddLine(QUEST_DASH .. PERCENTAGE_STRING:format(percent), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+		else
+			GameTooltip_ShowProgressBar(BWQ.tooltip, 0, 100, percent, PERCENTAGE_STRING:format(percent))
+		end
 	end
 
 	BWQ.tooltip:Show()
@@ -225,7 +230,15 @@ local ShowWorldQuestPOITooltip = function(button,poi)
     BWQ.tooltip:SetOwner(button, "ANCHOR_CURSOR")
     BWQ.tooltip:SetText(poi.name)
 	if button.quest.LockedWQ then
-		local description = string.format("You must complete %d more %s in %s to unlock '%s', which rewards |5 %s.", button.quest.LockedWQ_questsRemaining, button.quest.LockedWQ_questsRemaining > 1 and "WQs" or "WQ", button.quest.LockedWQ_zone, poi.name, button.quest.reward.itemLink)
+		local questsRemaining = button.quest.LockedWQ_questsRemaining or 0
+		local zone = button.quest.LockedWQ_zone or ""
+		local itemLink = button.quest.reward and button.quest.reward.itemLink
+		local description
+		if itemLink then
+			description = string.format("You must complete %d more %s in %s to unlock '%s', which rewards %s.", questsRemaining, questsRemaining > 1 and "WQs" or "WQ", zone, poi.name, itemLink)
+		else
+			description = string.format("You must complete %d more %s in %s to unlock '%s'.", questsRemaining, questsRemaining > 1 and "WQs" or "WQ", zone, poi.name)
+		end
     	BWQ.tooltip:AddLine(description, 1, 1, 1, true)
 	end
     BWQ.tooltip:Show()
@@ -249,36 +262,59 @@ function BWQ:CalculateMapPosition(x, y)
 end
 
 local Row_OnClick = function(row)
+	-- TAINT FIX (12.0.0+): Defer WorldMapFrame method calls and quest watch API calls
+	-- to break taint chains. When called from addon code (this click handler), these APIs
+	-- trigger secure Blizzard code paths that fail if the execution context is tainted:
+	--
+	-- Shift+Click: C_QuestLog.AddWorldQuestWatch/RemoveWorldQuestWatch triggers
+	--   QUEST_WATCH_LIST_CHANGED -> SuperTrackEventMixin -> QuestDataProvider:RefreshAllData
+	--   -> AcquirePin -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
+	--
+	-- Normal Click: ShowUIPanel(WorldMapFrame) / WorldMapFrame:SetMapID() triggers
+	--   OnMapChanged -> secureexecuterange(dataProviders) -> AcquirePin
+	--   -> SetPassThroughButtons (BLOCKED)
+	--
+	-- C_Timer.After(0) defers execution to the next frame in a clean (non-addon) context.
+
 	if IsShiftKeyDown() then
-		if (C_QuestLog.GetQuestWatchType(row.quest.questID) == Enum.QuestWatchType.Manual or C_SuperTrack.GetSuperTrackedQuestID() == row.quest.questID) then
-			C_QuestLog.RemoveWorldQuestWatch(row.quest.questID)
-		else
-			C_QuestLog.AddWorldQuestWatch(row.quest.questID, Enum.QuestWatchType.Manual)
-		end
-	else
-		if not WorldMapFrame:IsShown() then ShowUIPanel(WorldMapFrame) end
-		if WorldMapFrame:IsShown() then
-			WorldMapFrame:SetMapID(row.mapId)
-			if not row.quest.x or not row.quest.y then BWQ:QueryZoneQuestCoordinates(row.mapId) end
-			if row.quest.x and row.quest.y then
-				local x, y = BWQ:CalculateMapPosition(row.quest.x, row.quest.y)
-				local scale = WorldMapFrame:GetCanvasScale()
-				local size = 30 / scale * 1.35
-				BWQ.mapTextures:ClearAllPoints()
-				BWQ.mapTextures.highlightArrow:SetSize(size, size)
-				BWQ.mapTextures:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
-				BWQ.mapTextures.animationGroup:Play()
+		local questID = row.quest.questID
+		C_Timer.After(0, function()
+			if C_QuestLog.GetQuestWatchType(questID) == Enum.QuestWatchType.Manual or C_SuperTrack.GetSuperTrackedQuestID() == questID then
+				C_QuestLog.RemoveWorldQuestWatch(questID)
+			else
+				C_QuestLog.AddWorldQuestWatch(questID, Enum.QuestWatchType.Manual)
 			end
-		end
+		end)
+	else
+		-- Capture values before deferring (row is a reused button frame)
+		local mapId = row.mapId
+		local quest = row.quest
+
+		C_Timer.After(0, function()
+			if not WorldMapFrame:IsShown() then ShowUIPanel(WorldMapFrame) end
+			if WorldMapFrame:IsShown() then
+				WorldMapFrame:SetMapID(mapId)
+				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
+				if quest.x and quest.y then
+					local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
+					local scale = WorldMapFrame:GetCanvasScale()
+					local size = 30 / scale * 1.35
+					BWQ.mapTextures:ClearAllPoints()
+					BWQ.mapTextures.highlightArrow:SetSize(size, size)
+					BWQ.mapTextures:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
+					BWQ.mapTextures.animationGroup:Play()
+				end
+			end
+		end)
 
 		if TomTom and BWQ:C("enableTomTomWaypointsOnClick") then
-			if C_AddOns.IsAddOnLoaded("TomTom") then 
-				if not row.quest.x or not row.quest.y then BWQ:QueryZoneQuestCoordinates(row.mapId) end
-				if row.quest.x and row.quest.y then
-					if BWQ.TomTomWaypoints[row.quest.questID] then 
-						TomTom:RemoveWaypoint(BWQ.TomTomWaypoints[row.quest.questID]) 
+			if C_AddOns.IsAddOnLoaded("TomTom") then
+				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
+				if quest.x and quest.y then
+					if BWQ.TomTomWaypoints[quest.questID] then
+						TomTom:RemoveWaypoint(BWQ.TomTomWaypoints[quest.questID])
 					else
-						BWQ.TomTomWaypoints[row.quest.questID] = TomTom:AddWaypoint(row.mapId, row.quest.x, row.quest.y, { title = row.quest.title, silent = true, from = "Broker_WorldQuests" })
+						BWQ.TomTomWaypoints[quest.questID] = TomTom:AddWaypoint(mapId, quest.x, quest.y, { title = quest.title, silent = true, from = "Broker_WorldQuests" })
 					end
 				end
 			end
@@ -654,6 +690,10 @@ local RetrieveWorldQuests = function(mapId)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.THE_SINGULARITY
 									quest.reward.TheSingularityAmount = currency.amount
 									if BWQ:C("showTheSingularity") then quest.hide = false end		
+								elseif currencyId == 3370 then -- The Hara'ti
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.THE_HARATI
+									quest.reward.TheHaratiAmount = currency.amount
+									if BWQ:C("showTheHarati") then quest.hide = false end		
 								else 
 									if BWQcfg.spewDebugInfo then print(string.format("[BWQ] Unhandled currency: ID %s", currencyId)) end
 								end
@@ -899,6 +939,8 @@ local RetrieveWorldQuests = function(mapId)
 									BWQ.totalTheAmaniTribe = BWQ.totalTheAmaniTribe + quest.reward.TheAmaniTribeAmount
 								elseif rtype == CONSTANTS.REWARD_TYPES.THE_SINGULARITY then
 									BWQ.totalTheSingularity = BWQ.totalTheSingularity + quest.reward.TheSingularityAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.THE_HARATI then
+									BWQ.totalTheHarati = BWQ.totalTheHarati + quest.reward.TheHaratiAmount
 								end
 							end
 						end
@@ -1090,7 +1132,7 @@ function BWQ:UpdateQuestData()
 	BWQ.totalPolishedPetCharms, BWQ.totalCouncilofDornogal, BWQ.totalTheWeaver, BWQ.totalTheGeneral, BWQ.totalTheVizier = 0, 0, 0, 0, 0
 	BWQ.totalXP, BWQ.totalBronzeCelebrationToken, BWQ.totalWeatheredUndermineCrest, BWQ.totalCarvedUndermineCrest, BWQ.totalTheCartelsOfUndermine = 0, 0, 0, 0, 0
 	BWQ.totalTheBilgewaterCartel, BWQ.totalTheBlackwaterCartel, BWQ.totalTheSteamwheedleCartel, BWQ.totalTheVentureCompany, BWQ.totalWeatheredEtherealCrest = 0, 0, 0, 0, 0
-	BWQ.totalVoidlightMarl, BWQ.totalTheAmaniTribe, BWQ.totalTheSingularity = 0, 0, 0
+	BWQ.totalVoidlightMarl, BWQ.totalTheAmaniTribe, BWQ.totalTheSingularity, BWQ.totalTheHarati = 0, 0, 0, 0
 	BWQ.totalTwilightsBladeInsignia = 0
 
 	for mapId in next, BWQ.MAP_ZONES[BWQ.expansion] do
@@ -1713,6 +1755,7 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowVoidlightMarl") 		and BWQ.totalVoidlightMarl > 0			then brokerString = string.format("%s|TInterface\\Icons\\inv_112_raidtrinkets_voidprism:16:16|t %d  ", brokerString, BWQ.totalVoidlightMarl) end
 		if BWQ:C("brokerShowTheAmaniTribe") 		and BWQ.totalTheAmaniTribe > 0			then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-flames:16:16|t %d  ", brokerString, BWQ.totalTheAmaniTribe) end
 		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-sky:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
+		if BWQ:C("brokerShowTheHarati") 			and BWQ.totalTheHarati > 0 				then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-vines:16:16|t %d  ", brokerString, BWQ.totalTheHarati) end
 
 		if brokerString and brokerString ~= "" then
 			BWQ.WorldQuestsBroker.text = brokerString
@@ -1727,19 +1770,26 @@ function BWQ:UpdateBlock()
 end
 
 local SetFlightMapPins = function(self)
-	for pin, active in self:GetMap():EnumeratePinsByTemplate("WorldQuestPinTemplate") do
+	for pin, active in self:EnumeratePinsByTemplate("FlightMap_WorldQuestPinTemplate") do
 		if C_SuperTrack.GetSuperTrackedQuestID() == pin.questID then
 			pin:SetAlphaLimits(nil, 0.0, 1.0)
 			pin:SetAlpha(1)
 			pin:Show()
 		else
 			pin:SetAlphaLimits(1.0, 0.0, 1.0)
-			if FlightMapFrame.ScrollContainer:IsZoomedOut() then pin:Hide() end
+			if self.ScrollContainer:IsAtMinZoom() then pin:Hide() end
 		end
 	end
 end
 function BWQ:AddFlightMapHook()
-	hooksecurefunc(WorldQuestDataProviderMixin, "RefreshAllData", SetFlightMapPins)
+	-- Hook the FlightMapFrame instance directly instead of the base
+	-- WorldQuestDataProviderMixin. In 12.0.0+, hooking the base mixin's RefreshAllData
+	-- taints the world map execution context, causing EmbeddedItemTooltip_UpdateSize to
+	-- crash with secret values when hovering world quest pins during combat. By hooking
+	-- the FlightMapFrame instance, only the flight map is affected.
+	if FlightMapFrame then
+		hooksecurefunc(FlightMapFrame, "RefreshAllDataProviders", SetFlightMapPins)
+	end
 end
 
 function BWQ:AttachToBlock(anchor)
@@ -1816,26 +1866,51 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 			end
 		end
 
-		hooksecurefunc(WorldMapFrame, "Hide", function(self)
+		-- TAINT FIX (12.0.0+): Replace hooksecurefunc on WorldMapFrame with EventRegistry
+		-- callbacks where possible, and defer remaining hooks to break taint chains.
+		--
+		-- In 12.0.0+, hooksecurefunc on WorldMapFrame methods (Hide/Show/OnMapChanged) causes
+		-- the world map execution context to inherit addon taint. This propagates through:
+		--
+		-- ERROR 1: QuestDataProvider:RefreshAllData -> AcquirePin -> CheckMouseButtonPassthrough
+		--   -> SetPassThroughButtons (PROTECTED, BLOCKED by taint)
+		--
+		-- ERROR 2: TaskPOI_OnEnter -> GameTooltip_AddQuest -> GameTooltip_ShowProgressBar ->
+		--   GameTooltip_InsertFrame -> frame:GetWidth() returns secret value tainted by addon
+		--   -> comparison crashes at SharedTooltipTemplates.lua:209
+		--
+		-- FIX: Use Blizzard's own EventRegistry events ("WorldMapOnShow" / "WorldMapOnHide")
+		-- which fire at the END of OnShow/OnHide, after all secure operations. For OnMapChanged,
+		-- defer addon work with C_Timer.After(0) to run in a clean execution context.
+
+		-- WorldMapFrame Hide: use EventRegistry event (fires at end of WorldMapMixin:OnHide)
+		EventRegistry:RegisterCallback("WorldMapOnHide", function()
 			if BWQ:C("attachToWorldMap") then
 				BWQ:Hide()
 			end
-
 			BWQ.mapTextures.animationGroup:Stop()
-		end)
-		hooksecurefunc(WorldMapFrame, "Show", function(self)
+		end, BWQ)
+
+		-- WorldMapFrame Show: use EventRegistry event (fires at end of WorldMapMixin:OnShow)
+		EventRegistry:RegisterCallback("WorldMapOnShow", function()
 			if BWQ:C("attachToWorldMap") then
 				BWQ:AttachToWorldMap()
 				BWQ:RunUpdate()
 			end
-		end)
+		end, BWQ)
+
+		-- WorldMapFrame OnMapChanged: must still use hooksecurefunc because there is no
+		-- EventRegistry event for map changes. Defer ALL addon work to next frame via
+		-- C_Timer.After(0) so the hook body itself does nothing in the secure context.
 		hooksecurefunc(WorldMapFrame, "OnMapChanged", function(self)
-			BWQ.skipNextUpdate = true
-			local mapId = WorldMapFrame:GetMapID()
-			if BWQ.currentMapId and BWQ.currentMapId ~= mapId then
-				BWQ.mapTextures.animationGroup:Stop()
-			end
-			BWQ.currentMapId = mapId
+			C_Timer.After(0, function()
+				BWQ.skipNextUpdate = true
+				local mapId = WorldMapFrame:GetMapID()
+				if BWQ.currentMapId and BWQ.currentMapId ~= mapId then
+					BWQ.mapTextures.animationGroup:Stop()
+				end
+				BWQ.currentMapId = mapId
+			end)
 		end)
 
 		BWQ:UnregisterEvent("PLAYER_ENTERING_WORLD")
@@ -1878,11 +1953,15 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				BWQ:SwitchExpansion(BWQ:C("expansion"))
 			end	
 
-			if C_AddOns.IsAddOnLoaded('Blizzard_SharedMapDataProviders') then
+			-- Wait for Blizzard_FlightMap before applying flight map hook.
+			-- Hooking the base WorldQuestDataProviderMixin taints the world map
+			-- tooltip path in 12.0.0+, causing secret values crash during combat.
+			if C_AddOns.IsAddOnLoaded('Blizzard_FlightMap') then
 				BWQ:AddFlightMapHook()
 				BWQ:UnregisterEvent("ADDON_LOADED")
 			end
-		elseif arg1 == "Blizzard_SharedMapDataProviders" then
+			-- else: keep ADDON_LOADED registered to catch Blizzard_FlightMap later
+		elseif arg1 == "Blizzard_FlightMap" then
 			BWQ:AddFlightMapHook()
 			BWQ:UnregisterEvent("ADDON_LOADED")
 		end

@@ -181,6 +181,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "brokerShowVoidlightMarl" },
 					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "brokerShowTheAmaniTribe" },
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "brokerShowTheSingularity" },
+					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("Interface\\Icons\\ui_majorfaction_-vines"), check = "brokerShowTheHarati" },
 				}
 			},
 			{ text = "Sort list by time remaining instead of reward type", check = "sortByTimeRemaining" },
@@ -204,6 +205,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "showVoidlightMarl" },
 					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "showTheAmaniTribe" },
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "showTheSingularity" },
+					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("Interface\\Icons\\ui_majorfaction_-vines"), check = "showTheHarati" },
 				}
 			},
 			{ text = "      The War Within", submenu = {
@@ -437,6 +439,7 @@ BWQ.defaultConfig = {
 		brokerShowVoidlightMarl = true,
 		brokerShowTheAmaniTribe = true,
 		brokerShowTheSingularity = true,
+		brokerShowTheHarati = true,
 	sortByTimeRemaining = false,
 	showNEWTextWhenAppropriate = true,
 	-- reward type
@@ -479,6 +482,7 @@ BWQ.defaultConfig = {
 	showVoidlightMarl = true,
 	showTheAmaniTribe = true,
 	showTheSingularity = true,
+	showTheHarati = true,
 	showItems = true,
 		showGear = true,
 		showRelics = true,

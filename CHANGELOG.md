@@ -1,3 +1,7 @@
+### 12.0.1.2
+* Added support for The Hara'ti currency/reputation
+* Fixed miscellaneous taint and secret value errors for WoW 12.0.0+ compatibility
+
 ### 12.0.1.1
 * Added support for Midnight Expansion including the first 4 zones and first 3 currencies
 * Fixed bounty tooltip crash during combat caused by secret value taint in 12.0.0+
