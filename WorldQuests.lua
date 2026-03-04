@@ -293,6 +293,9 @@ local Row_OnClick = function(row)
 		C_Timer.After(0, function()
 			if not WorldMapFrame:IsShown() then ShowUIPanel(WorldMapFrame) end
 			if WorldMapFrame:IsShown() then
+				-- Flag that the addon is about to change the map, so the
+				-- QUEST_LOG_UPDATE handler won't stop the ping animation.
+				BWQ.expectMapChange = true
 				WorldMapFrame:SetMapID(mapId)
 				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
 				if quest.x and quest.y then
@@ -994,10 +997,11 @@ local RetrieveWorldQuests = function(mapId)
 	local areaPoiIDs = C_AreaPoiInfo.GetAreaPOIForMap(mapId)
     if areaPoiIDs then
         for i, poiID in ipairs(areaPoiIDs) do
+			local showCapstone = true
             local poi = C_AreaPoiInfo.GetAreaPOIInfo(mapId,poiID)
             if poi and string.find(poi.name, "Special Assignment") then		-- TODO:  Are there other "names" that should be showing other than "Special Assignment" quests?
 				local questID = poi.areaPoiID
-				table.insert(BWQ.MAP_ZONES[BWQ.expansion][mapId].questsSort, questID)
+				--table.insert(BWQ.MAP_ZONES[BWQ.expansion][mapId].questsSort, questID)
 				local quest = BWQ.MAP_ZONES[BWQ.expansion][mapId].quests[questID] or {}
 				quest.title = poi.name
 				quest.LockedWQ = true
@@ -1066,6 +1070,11 @@ local RetrieveWorldQuests = function(mapId)
 											--print(string.format("[BWQ]: %s", quest.LockedWQ_QuestToComplete))
 											zone = C_Map.GetMapInfo(mapId).name or "UNKNOWN"
 										end
+										if (quests and tonumber(quests) <= 0) then
+											-- sometimes the map doesn't update properly when unlocking the special assignments.  This is to avoid the addon showing
+											-- the locked quest when there are no more required world quests to complete.  The bug itself can only be fixed by relogging.
+											showCapstone = false
+										end
 										quest.LockedWQ_questsRemaining = quests and tonumber(quests) or 0
 										quest.LockedWQ_zone = zone or ""
 									end
@@ -1087,8 +1096,11 @@ local RetrieveWorldQuests = function(mapId)
 					end
 				end
 
-				BWQ.MAP_ZONES[BWQ.expansion][mapId].quests[questID] = quest
-				numQuests = numQuests + 1
+				if showCapstone then
+					table.insert(BWQ.MAP_ZONES[BWQ.expansion][mapId].questsSort, questID)
+					BWQ.MAP_ZONES[BWQ.expansion][mapId].quests[questID] = quest
+					numQuests = numQuests + 1
+				end
 			end
 		end
 
@@ -1822,15 +1834,29 @@ BWQ:RegisterEvent("PLAYER_ENTERING_WORLD")
 BWQ:RegisterEvent("ADDON_LOADED")
 BWQ:SetScript("OnEvent", function(self, event, arg1)
 	if event == "QUEST_LOG_UPDATE" then
-		--[[
-		Opening quest details in the side bar of the world map fires QUEST_LOG_UPDATE event.
-		To avoid setting the currently shown map again, which would hide the quest details,
-		skip updating after a WORLD_MAP_UPDATE event happened
-		--]]
-		if not BWQ.skipNextUpdate then
-			BWQ:RunUpdate()
+		-- Detect world map changes without hooking WorldMapFrame:OnMapChanged().
+		-- When the user navigates to a different zone on the world map, OnMapChanged fires
+		-- which triggers QUEST_LOG_UPDATE. If the world map is open and its mapID has changed,
+		-- skip this update to avoid interfering with the quest detail sidebar, and stop
+		-- the map ping animation since the user moved away from the pinged zone.
+		if WorldMapFrame and WorldMapFrame:IsShown() then
+			local currentMapId = WorldMapFrame:GetMapID()
+			if BWQ.currentMapId and BWQ.currentMapId ~= currentMapId then
+				-- Only stop the animation if the USER navigated away from the
+				-- pinged zone. If Row_OnClick set expectMapChange, the addon
+				-- itself opened/navigated the map to show the ping, so keep it.
+				if BWQ.expectMapChange then
+					BWQ.expectMapChange = nil
+				else
+					BWQ.mapTextures.animationGroup:Stop()
+				end
+				BWQ.currentMapId = currentMapId
+				-- Skip this update -- the map change already refreshed everything
+				return
+			end
+			BWQ.currentMapId = currentMapId
 		end
-		BWQ.skipNextUpdate = false
+		BWQ:RunUpdate()
 	elseif event == "QUEST_WATCH_LIST_CHANGED" then
 		BWQ:UpdateBlock()
 	elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
@@ -1866,22 +1892,27 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 			end
 		end
 
-		-- TAINT FIX (12.0.0+): Replace hooksecurefunc on WorldMapFrame with EventRegistry
-		-- callbacks where possible, and defer remaining hooks to break taint chains.
+		-- TAINT FIX (12.0.0+): ZERO hooks on WorldMapFrame.
 		--
-		-- In 12.0.0+, hooksecurefunc on WorldMapFrame methods (Hide/Show/OnMapChanged) causes
-		-- the world map execution context to inherit addon taint. This propagates through:
+		-- In 12.0.0+, ANY hooksecurefunc on WorldMapFrame methods (Hide/Show/OnMapChanged)
+		-- causes the world map's secure execution context to inherit addon taint. Even with
+		-- C_Timer.After(0) deferral in the hook body, the hook registration itself taints
+		-- the method dispatch chain. This taint propagates through:
 		--
-		-- ERROR 1: QuestDataProvider:RefreshAllData -> AcquirePin -> CheckMouseButtonPassthrough
-		--   -> SetPassThroughButtons (PROTECTED, BLOCKED by taint)
+		-- WorldMapMixin:OnMapChanged -> MapCanvasMixin:OnMapChanged
+		--   -> secureexecuterange(dataProviders) [tainted by addon hook]
+		--   -> WorldQuestDataProvider:RefreshAllData -> AcquirePin
+		--   -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
 		--
-		-- ERROR 2: TaskPOI_OnEnter -> GameTooltip_AddQuest -> GameTooltip_ShowProgressBar ->
-		--   GameTooltip_InsertFrame -> frame:GetWidth() returns secret value tainted by addon
-		--   -> comparison crashes at SharedTooltipTemplates.lua:209
+		-- And later when hovering world quest pins during combat:
+		--   TaskPOI_OnEnter -> GameTooltip_AddQuest -> GameTooltip_AddQuestRewardsToTooltip
+		--   -> EmbeddedItemTooltip_SetItemByQuestReward -> EmbeddedItemTooltip_UpdateSize
+		--   -> self.Tooltip:GetWidth() returns secret value (tainted by Broker_WorldQuests)
+		--   -> arithmetic on secret value -> CRASH at GameTooltip.lua:754
 		--
-		-- FIX: Use Blizzard's own EventRegistry events ("WorldMapOnShow" / "WorldMapOnHide")
-		-- which fire at the END of OnShow/OnHide, after all secure operations. For OnMapChanged,
-		-- defer addon work with C_Timer.After(0) to run in a clean execution context.
+		-- FIX: Use Blizzard's EventRegistry events for Show/Hide, and detect map changes
+		-- by comparing WorldMapFrame:GetMapID() inside the QUEST_LOG_UPDATE handler
+		-- (which fires naturally when the user navigates to a different zone on the map).
 
 		-- WorldMapFrame Hide: use EventRegistry event (fires at end of WorldMapMixin:OnHide)
 		EventRegistry:RegisterCallback("WorldMapOnHide", function()
@@ -1889,29 +1920,35 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				BWQ:Hide()
 			end
 			BWQ.mapTextures.animationGroup:Stop()
+			BWQ.currentMapId = nil
+			BWQ.expectMapChange = nil
 		end, BWQ)
 
 		-- WorldMapFrame Show: use EventRegistry event (fires at end of WorldMapMixin:OnShow)
 		EventRegistry:RegisterCallback("WorldMapOnShow", function()
+			-- Initialize currentMapId so the QUEST_LOG_UPDATE handler can detect
+			-- subsequent map changes without needing a hooksecurefunc on OnMapChanged.
+			BWQ.currentMapId = WorldMapFrame:GetMapID()
 			if BWQ:C("attachToWorldMap") then
 				BWQ:AttachToWorldMap()
 				BWQ:RunUpdate()
 			end
 		end, BWQ)
 
-		-- WorldMapFrame OnMapChanged: must still use hooksecurefunc because there is no
-		-- EventRegistry event for map changes. Defer ALL addon work to next frame via
-		-- C_Timer.After(0) so the hook body itself does nothing in the secure context.
-		hooksecurefunc(WorldMapFrame, "OnMapChanged", function(self)
-			C_Timer.After(0, function()
-				BWQ.skipNextUpdate = true
-				local mapId = WorldMapFrame:GetMapID()
-				if BWQ.currentMapId and BWQ.currentMapId ~= mapId then
-					BWQ.mapTextures.animationGroup:Stop()
-				end
-				BWQ.currentMapId = mapId
-			end)
-		end)
+		-- TAINT FIX (12.0.0+): OnMapChanged detection moved to QUEST_LOG_UPDATE handler.
+		-- We no longer hook WorldMapFrame:OnMapChanged() because even with C_Timer.After(0)
+		-- deferral, the mere existence of a hooksecurefunc on WorldMapFrame methods causes
+		-- the secure execution context to be tainted. This taint propagates through:
+		--   secureexecuterange(dataProviders) -> WorldQuestDataProvider -> AcquirePin
+		--   -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
+		-- and later when hovering pins:
+		--   TaskPOI_OnEnter -> GameTooltip_AddQuest -> EmbeddedItemTooltip_UpdateSize
+		--   -> GetWidth() returns secret value -> arithmetic crash
+		-- Instead, we detect map changes by comparing WorldMapFrame:GetMapID() inside
+		-- the QUEST_LOG_UPDATE handler, which fires naturally when the map zone changes.
+		if WorldMapFrame and WorldMapFrame:IsShown() then
+			BWQ.currentMapId = WorldMapFrame:GetMapID()
+		end
 
 		BWQ:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -1977,7 +2014,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				BWQ.TomTomWaypoints[k] = nil
 			end
 		end
-	elseif event == "ZONE_CHANGED_NEW_AREA" or "NEW_WMO_CHUNK" then
+	elseif event == "ZONE_CHANGED_NEW_AREA" or event == "NEW_WMO_CHUNK" then
 		local mapID = C_Map.GetBestMapForUnit("player")
 		if mapID then
 			if mapID == BWQ.mapID then
