@@ -1,6 +1,8 @@
 ### 12.0.1.2
+* Added support for Slayer's Rise (the northern part of Voidstorm)
 * Added support for The Hara'ti currency/reputation
 * Fixed miscellaneous taint and secret value errors for WoW 12.0.0+ compatibility
+(NOTE: There are still taint issues that are being worked on.)
 
 ### 12.0.1.1
 * Added support for Midnight Expansion including the first 4 zones and first 3 currencies

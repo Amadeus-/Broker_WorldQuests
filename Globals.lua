@@ -39,6 +39,7 @@ BWQ.MAP_ZONES = {
 		[2437] = { id = 2437, name = C_Map.GetMapInfo(2437).name, quests = {}, buttons = {}, }, -- Zul'Aman 12.0
 		[2413] = { id = 2413, name = C_Map.GetMapInfo(2413).name, quests = {}, buttons = {}, }, -- Harandar 12.0
 		[2405] = { id = 2405, name = C_Map.GetMapInfo(2405).name, quests = {}, buttons = {}, }, -- Voidstorm 12.0
+		[2444] = { id = 2444, name = C_Map.GetMapInfo(2444).name, quests = {}, buttons = {}, }, -- Slayer's Rise (part of Voidstorm) 12.0
 	},
 	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = {
 		[2248] = { id = 2248, name = C_Map.GetMapInfo(2248).name, quests = {}, buttons = {}, }, -- Isle of Dorn 11.0
@@ -102,7 +103,7 @@ BWQ.MAP_ZONES = {
 -- The following table is used to sort the zones when displayed. This table should only include zones that are in the 
 -- BWQ.MAP_ZONES table above.
 BWQ.MAP_ZONES_SORT = {
-	[CONSTANTS.EXPANSIONS.MIDNIGHT] = 		{	2395, 2437, 2413, 2405												},
+	[CONSTANTS.EXPANSIONS.MIDNIGHT] = 		{	2395, 2437, 2413, 2405, 2444												},
 	[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 	{	2248, 2214, 2215, 2255, 2213, 2369, 2346, 2371, 2472, 241			},
 	[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 	{	2022, 2023, 2024, 2025, 2085, 2151, 2133, 2200						},
 	[CONSTANTS.EXPANSIONS.SHADOWLANDS] =  	{	1525, 1533, 1536, 1565, 1543, 1970									},
