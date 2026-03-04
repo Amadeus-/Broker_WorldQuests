@@ -204,12 +204,9 @@ local ShowQuestObjectiveTooltip = function(row)
 
 	local percent = C_TaskQuest.GetQuestProgressBarInfo(row.quest.questID)
 	if percent then
-		if InCombatLockdown() then
-			-- Text fallback: progress bar widget taints frame width measurements during combat
-			BWQ.tooltip:AddLine(QUEST_DASH .. PERCENTAGE_STRING:format(percent), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-		else
-			GameTooltip_ShowProgressBar(BWQ.tooltip, 0, 100, percent, PERCENTAGE_STRING:format(percent))
-		end
+		-- Text fallback: GameTooltip_ShowProgressBar calls GetWidth() which returns
+		-- a secret value in addon-tainted execution contexts (12.0.0+), not just combat
+		BWQ.tooltip:AddLine(QUEST_DASH .. PERCENTAGE_STRING:format(percent), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 	end
 
 	BWQ.tooltip:Show()
@@ -262,27 +259,38 @@ function BWQ:CalculateMapPosition(x, y)
 end
 
 local Row_OnClick = function(row)
-	-- TAINT FIX (12.0.0+): Defer WorldMapFrame method calls and quest watch API calls
-	-- to break taint chains. When called from addon code (this click handler), these APIs
-	-- trigger secure Blizzard code paths that fail if the execution context is tainted:
+	-- TAINT FIX (12.0.0+): Prevent quest watch / world map API calls from propagating
+	-- addon taint into Blizzard's secure execution chains.
 	--
-	-- Shift+Click: C_QuestLog.AddWorldQuestWatch/RemoveWorldQuestWatch triggers
-	--   QUEST_WATCH_LIST_CHANGED -> SuperTrackEventMixin -> QuestDataProvider:RefreshAllData
-	--   -> AcquirePin -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
+	-- Root cause: When addon code calls C_QuestLog.AddWorldQuestWatch() or
+	-- RemoveWorldQuestWatch(), the resulting QUEST_WATCH_LIST_CHANGED event carries
+	-- "forward taint" from the addon. Blizzard's SuperTrackEventMixin handles this
+	-- event and may call C_SuperTrack.SetSuperTrackedQuestID(0), which fires
+	-- SUPER_TRACKING_CHANGED -- also tainted. This cascades through:
+	--   EventRegistry:TriggerEvent("Supertracking.OnChanged")
+	--   -> QuestDataProvider:RefreshAllData -> AcquirePin
+	--   -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
 	--
-	-- Normal Click: ShowUIPanel(WorldMapFrame) / WorldMapFrame:SetMapID() triggers
-	--   OnMapChanged -> secureexecuterange(dataProviders) -> AcquirePin
-	--   -> SetPassThroughButtons (BLOCKED)
+	-- Similarly, ShowUIPanel(WorldMapFrame) / WorldMapFrame:SetMapID() triggers
+	-- OnMapChanged -> secureexecuterange(dataProviders) -> AcquirePin -> BLOCKED.
 	--
-	-- C_Timer.After(0) defers execution to the next frame in a clean (non-addon) context.
+	-- C_Timer.After(0) alone does NOT break this taint: the timer callback closure
+	-- is still associated with the addon that created it, so all API calls within it
+	-- execute in a tainted context, and events they fire carry that taint forward.
+	--
+	-- FIX: Use securecallfunction() to call the C APIs. securecallfunction() executes
+	-- a function in its OWN security context. Since C_QuestLog.AddWorldQuestWatch etc.
+	-- are C++ (secure) functions, securecallfunction() calls them in a secure context,
+	-- and the resulting game events do NOT carry addon taint. We still use C_Timer.After(0)
+	-- to defer execution out of the click handler's synchronous call chain.
 
 	if IsShiftKeyDown() then
 		local questID = row.quest.questID
 		C_Timer.After(0, function()
 			if C_QuestLog.GetQuestWatchType(questID) == Enum.QuestWatchType.Manual or C_SuperTrack.GetSuperTrackedQuestID() == questID then
-				C_QuestLog.RemoveWorldQuestWatch(questID)
+				securecallfunction(C_QuestLog.RemoveWorldQuestWatch, questID)
 			else
-				C_QuestLog.AddWorldQuestWatch(questID, Enum.QuestWatchType.Manual)
+				securecallfunction(C_QuestLog.AddWorldQuestWatch, questID, Enum.QuestWatchType.Manual)
 			end
 		end)
 	else
@@ -291,12 +299,12 @@ local Row_OnClick = function(row)
 		local quest = row.quest
 
 		C_Timer.After(0, function()
-			if not WorldMapFrame:IsShown() then ShowUIPanel(WorldMapFrame) end
+			if not WorldMapFrame:IsShown() then securecallfunction(ShowUIPanel, WorldMapFrame) end
 			if WorldMapFrame:IsShown() then
 				-- Flag that the addon is about to change the map, so the
 				-- QUEST_LOG_UPDATE handler won't stop the ping animation.
 				BWQ.expectMapChange = true
-				WorldMapFrame:SetMapID(mapId)
+				securecallfunction(WorldMapFrame.SetMapID, WorldMapFrame, mapId)
 				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
 				if quest.x and quest.y then
 					local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
