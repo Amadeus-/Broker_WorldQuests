@@ -347,9 +347,24 @@ local RetrieveWorldQuests = function(mapId)
 		local timeLeft, questTagInfo, title, factionId
 		for i, q in ipairs(questList) do
 			if DebugRetrieveWQ then
-				print(string.format("[BWQ] questList.%d: ID: %s (mapId: %d)", i, tostring(q.questID), mapId))
+				print(string.format("[BWQ] questList.%d: ID: %s (mapId: %d, q.mapID: %d, childDepth: %s)", i, tostring(q.questID), mapId, q.mapID, tostring(q.childDepth)))
 			end
-			if HaveQuestData(q.questID) and q.mapID == mapId then 
+			-- Deduplicate child-zone quests: C_TaskQuest.GetQuestsOnMap() for a parent zone
+			-- returns child-zone quests with mapID remapped to the parent. If the child zone
+			-- (e.g., Slayer's Rise 2444) is also in MAP_ZONES, skip the quest here so it only
+			-- appears under the more specific child zone, not duplicated under the parent
+			-- (e.g., Voidstorm 2405) as well.
+			local skipChildZoneQuest = false
+			if q.childDepth and q.mapID == mapId then
+				local trueZoneID = C_TaskQuest.GetQuestZoneID(q.questID)
+				if trueZoneID and trueZoneID ~= mapId and BWQ.MAP_ZONES[BWQ.expansion][trueZoneID] then
+					skipChildZoneQuest = true
+					if DebugRetrieveWQ then
+						print(string.format("[BWQ] questList.%d: SKIPPED (child zone %d is tracked separately)", i, trueZoneID))
+					end
+				end
+			end
+			if not skipChildZoneQuest and HaveQuestData(q.questID) and q.mapID == mapId then
 				timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(q.questID) or 0
 				questTagInfo = C_QuestLog.GetQuestTagInfo(q.questID)
 

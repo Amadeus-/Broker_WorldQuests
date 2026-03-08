@@ -1,3 +1,8 @@
+### 12.0.1.3
+* Added support for Silvermoon City
+* Fixed world quests appearing duplicated under both parent and child zone headers (e.g. Voidstorm and Slayer's Rise)
+* Added support for "Prey" quests.
+
 ### 12.0.1.2
 * Added support for Slayer's Rise (the northern part of Voidstorm)
 * Added support for The Hara'ti currency/reputation
