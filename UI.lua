@@ -149,11 +149,13 @@ BWQ:SetScript("OnLeave", function() BWQ:Block_OnLeave() end)
 --==========================================================
 -- Super Track Map Ping
 --==========================================================
-local mapTextures = CreateFrame("Frame", "BWQ_MapTextures", WorldMapFrame:GetCanvas())
+local mapTextures = CreateFrame("Frame", nil, WorldMapFrame:GetCanvas())
 mapTextures:SetSize(400,400)
 mapTextures:SetFrameStrata("DIALOG")
 mapTextures:SetFrameLevel(2001)
-local highlightArrow = mapTextures:CreateTexture("highlightArrow")
+mapTextures:EnableMouse(false)
+mapTextures:EnableMouseMotion(false)
+local highlightArrow = mapTextures:CreateTexture(nil)
 highlightArrow:SetTexture("Interface\\minimap\\MiniMap-DeadArrow")
 highlightArrow:SetSize(56, 56)
 highlightArrow:SetRotation(3.14)
@@ -162,8 +164,8 @@ highlightArrow:SetDrawLayer("ARTWORK", 1)
 mapTextures.highlightArrow = highlightArrow
 local animationGroup = mapTextures:CreateAnimationGroup()
 animationGroup:SetLooping("REPEAT")
-animationGroup:SetScript("OnPlay", function(self)		mapTextures.highlightArrow:Show()		end)
-animationGroup:SetScript("OnStop", function(self)		mapTextures.highlightArrow:Hide()		end)
+animationGroup:SetScript("OnPlay", function(self)		mapTextures:Show()		mapTextures.highlightArrow:Show()		end)
+animationGroup:SetScript("OnStop", function(self)		mapTextures.highlightArrow:Hide()		mapTextures:Hide()		end)
 local downAnimation = animationGroup:CreateAnimation("Translation")
 downAnimation:SetChildKey("highlightArrow")
 downAnimation:SetOffset(0, -10)
@@ -176,6 +178,7 @@ upAnimation:SetDuration(0.4)
 upAnimation:SetOrder(2)
 mapTextures.animationGroup = animationGroup
 BWQ.mapTextures = mapTextures
+mapTextures:Hide()
 
 --==========================================================
 -- Miscellaneous

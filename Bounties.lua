@@ -120,19 +120,8 @@ function BWQ:ShowBountyTooltip(button, questID)
 			GameTooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
 		end
 
-		-- Skip quest rewards tooltip during combat to avoid secret value taint errors.
-		-- In 12.0.0+, calling GameTooltip_AddQuestRewardsToTooltip from addon code during
-		-- combat causes EmbeddedItemTooltip_UpdateSize to crash because GetWidth()/GetHeight()
-		-- return secret values in a tainted execution context, and Blizzard's own code performs
-		-- arithmetic on them.
-		if not InCombatLockdown() then
-			GameTooltip_AddQuestRewardsToTooltip(GameTooltip, questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD)
-		else
-			GameTooltip:AddLine(" ")
-			GameTooltip:AddLine("Quest rewards unavailable during combat.", GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b, true)
-		end
+		pcall(GameTooltip_AddQuestRewardsToTooltip, GameTooltip, questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD)
 		GameTooltip:Show()
-		GameTooltip.recalculatePadding = true
 		button.UpdateTooltip = function(self) BWQ:ShowBountyTooltip(button, questID) end
 	end
 end
