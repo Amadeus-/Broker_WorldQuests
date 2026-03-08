@@ -139,6 +139,7 @@ CONSTANTS.WORLD_QUEST_ICONS_BY_TAG_ID = {
 	[281] = { icon = "worldquest-icon-race" },
 	[286] = { icon = "worldquest-Capstone-questmarker-epic-Toast", border = "worldquest-questmarker-dragon" },
 	[289] = { icon = "worldquest-icon-boss", border = "worldquest-questmarker-dragon-silver"  },
+	[295] = { icon = "worldquest-Prey-Crystal" },
 }
 
 CONSTANTS.CURRENCIES_AFFECTED_BY_WARMODE = {
