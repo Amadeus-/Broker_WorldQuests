@@ -1,3 +1,9 @@
+### 12.0.1.4
+* Improved quest reward loading: rewards now appear faster on login instead of showing XP placeholders
+* Fixed a bug where a single uncached item could prevent an entire zone's quests from displaying
+* Reduced taint issues causing tooltip errors when hovering world quest pins on the map
+(NOTE: There are still taint issues that are being worked on, but this should be a *little* better.)
+
 ### 12.0.1.3
 * Added support for Silvermoon City
 * Fixed world quests appearing duplicated under both parent and child zone headers (e.g. Voidstorm and Slayer's Rise)
@@ -7,7 +13,6 @@
 * Added support for Slayer's Rise (the northern part of Voidstorm)
 * Added support for The Hara'ti currency/reputation
 * Fixed miscellaneous taint and secret value errors for WoW 12.0.0+ compatibility
-(NOTE: There are still taint issues that are being worked on.)
 
 ### 12.0.1.1
 * Added support for Midnight Expansion including the first 4 zones and first 3 currencies

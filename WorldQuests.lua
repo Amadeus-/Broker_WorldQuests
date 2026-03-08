@@ -434,38 +434,44 @@ local RetrieveWorldQuests = function(mapId)
 							local itemInfo = C_Item.GetItemInfo(quest.reward.itemId)
 							if not itemInfo then
 								C_Item.RequestLoadItemDataByID(quest.reward.itemId)
-								return  -- wait for item data event
+								-- Do NOT return here -- that aborts ALL remaining quests in this zone.
+								-- Track the pending item so GET_ITEM_INFO_RECEIVED can trigger a refresh.
+								quest.reward.pendingItemData = true
+								BWQ.pendingItemIDs = BWQ.pendingItemIDs or {}
+								BWQ.pendingItemIDs[quest.reward.itemId] = true
 							end
-							equipSlot  = itemInfo.itemEquipLoc
-							classId    = itemInfo.classID
-							subClassId = itemInfo.subclassID
+							if itemInfo then
+								equipSlot  = itemInfo.itemEquipLoc
+								classId    = itemInfo.classID
+								subClassId = itemInfo.subclassID
 
-							if classId == 7 then
-								quest.sort = quest.sort > CONSTANTS.SORT_ORDER.PROFESSION and quest.sort or CONSTANTS.SORT_ORDER.PROFESSION
-								if quest.reward.itemId == 124124 then
-									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.BLOODOFSARGERAS
+								if classId == 7 then
+									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.PROFESSION and quest.sort or CONSTANTS.SORT_ORDER.PROFESSION
+									if quest.reward.itemId == 124124 then
+										rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.BLOODOFSARGERAS
+									end
+									if BWQ:C("showItems") and BWQ:C("showCraftingMaterials") then quest.hide = false end
+								elseif equipSlot ~= "" or itemId == 163857 --[[ Azerite Armor Cache ]] then
+									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.EQUIP and quest.sort or CONSTANTS.SORT_ORDER.EQUIP
+									quest.reward.realItemLevel = BWQ:GetItemLevelValueForQuestId(quest.questID)
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.GEAR
+									if BWQ:C("showItems") and BWQ:C("showGear") then quest.hide = false end
+								elseif C_Soulbinds.IsItemConduitByItemInfo(itemId) == true then
+									if BWQ:C("showConduits") then quest.hide = false end
+								elseif C_Item.IsAnimaItemByID(itemId) == true then
+									if BWQ:C("showAnima") then quest.hide = false end
+								elseif itemId == 137642 then -- mark of honor
+									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.ITEM and quest.sort or CONSTANTS.SORT_ORDER.ITEM
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.MARK_OF_HONOR
+									if BWQ:C("showItems") and BWQ:C("showMarkOfHonor") then quest.hide = false end
+								elseif itemId == 163036 then -- polished pet charm
+									quest.reward.polishedPetCharmsAmount = quest.reward.itemQuantity
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.POLISHED_PET_CHARM
+								else
+									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.ITEM and quest.sort or CONSTANTS.SORT_ORDER.ITEM
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
+									if BWQ:C("showItems") and BWQ:C("showOtherItems") then quest.hide = false end
 								end
-								if BWQ:C("showItems") and BWQ:C("showCraftingMaterials") then quest.hide = false end
-							elseif equipSlot ~= "" or itemId == 163857 --[[ Azerite Armor Cache ]] then
-								quest.sort = quest.sort > CONSTANTS.SORT_ORDER.EQUIP and quest.sort or CONSTANTS.SORT_ORDER.EQUIP
-								quest.reward.realItemLevel = BWQ:GetItemLevelValueForQuestId(quest.questID)
-								rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.GEAR
-								if BWQ:C("showItems") and BWQ:C("showGear") then quest.hide = false end
-							elseif C_Soulbinds.IsItemConduitByItemInfo(itemId) == true then
-								if BWQ:C("showConduits") then quest.hide = false end
-							elseif C_Item.IsAnimaItemByID(itemId) == true then
-								if BWQ:C("showAnima") then quest.hide = false end
-							elseif itemId == 137642 then -- mark of honor
-								quest.sort = quest.sort > CONSTANTS.SORT_ORDER.ITEM and quest.sort or CONSTANTS.SORT_ORDER.ITEM
-								rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.MARK_OF_HONOR
-								if BWQ:C("showItems") and BWQ:C("showMarkOfHonor") then quest.hide = false end
-							elseif itemId == 163036 then -- polished pet charm
-								quest.reward.polishedPetCharmsAmount = quest.reward.itemQuantity
-								rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.POLISHED_PET_CHARM
-							else
-								quest.sort = quest.sort > CONSTANTS.SORT_ORDER.ITEM and quest.sort or CONSTANTS.SORT_ORDER.ITEM
-								rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
-								if BWQ:C("showItems") and BWQ:C("showOtherItems") then quest.hide = false end
 							end
 						end
 					end
@@ -741,14 +747,40 @@ local RetrieveWorldQuests = function(mapId)
 							quest.reward.xp = xp
 							quest.sort = quest.sort > CONSTANTS.SORT_ORDER.XP and quest.sort or CONSTANTS.SORT_ORDER.XP
 							rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.XP
-							
+
 							if BWQ:C("showXP") then quest.hide = false end
+
+							-- XP-only world quests almost always means reward data hasn't
+							-- loaded from the server yet. Request data once per quest
+							-- (xpOnlyRequested gate prevents infinite re-requests), but
+							-- keep needsRefresh true so timer retries continue polling
+							-- until real rewards arrive or retries are exhausted.
+							BWQ.xpOnlyRequested = BWQ.xpOnlyRequested or {}
+							if not BWQ.xpOnlyRequested[quest.questID] then
+								BWQ.xpOnlyRequested[quest.questID] = true
+								C_QuestLog.RequestLoadQuestByID(quest.questID)
+								BWQ.pendingQuestIDs = BWQ.pendingQuestIDs or {}
+								BWQ.pendingQuestIDs[quest.questID] = true
+							end
+							-- Keep retries going until capped — reward data may still
+							-- be in transit from the server (especially on cold login)
+							if BWQ.updateTries < 10 then
+								BWQ.needsRefresh = true
+							end
 						end
 					end
 					if BWQcfg.spewDebugInfo and not hasReward and not HaveQuestData(quest.questID) then
 						print(string.format("[BWQ] Quest with no reward found: ID %s (%s)", quest.questID, quest.title))
 					end
-					if not hasReward then BWQ.needsRefresh = true end -- in most cases no reward means api returned incomplete data
+					if not hasReward then
+						BWQ.needsRefresh = true -- in most cases no reward means api returned incomplete data
+						-- Request quest data from server if not yet cached
+						if not HaveQuestData(quest.questID) then
+							C_QuestLog.RequestLoadQuestByID(quest.questID)
+							BWQ.pendingQuestIDs = BWQ.pendingQuestIDs or {}
+							BWQ.pendingQuestIDs[quest.questID] = true
+						end
+					end
 					
 					for _, bounty in ipairs(BWQ.bounties) do
 						if C_QuestLog.IsQuestCriteriaForBounty(quest.questID, bounty.questID) then
@@ -1198,9 +1230,11 @@ function BWQ:UpdateQuestData()
 		BWQcache.questIds = BWQ.questIds
 	end
 
-	if BWQ.needsRefresh and BWQ.updateTries < 3 then
+	if BWQ.needsRefresh and BWQ.updateTries < 10 then
 		BWQ.updateTries = BWQ.updateTries + 1
-		C_Timer.After(1, function() BWQ:UpdateBlock() end)
+		-- Progressive delay: 0.5s, 0.5s, 1s, 1s, 2s, 2s, 3s, 3s, 5s, 5s
+		local delay = BWQ.updateTries <= 2 and 0.5 or BWQ.updateTries <= 4 and 1 or BWQ.updateTries <= 6 and 2 or BWQ.updateTries <= 8 and 3 or 5
+		C_Timer.After(delay, function() BWQ:UpdateBlock() end)
 	end
 end
 
@@ -1345,6 +1379,7 @@ function BWQ:RunUpdate()
 	local currentTime = GetTime()
 	if currentTime - BWQ.lastUpdate > 5 then
 		BWQ.updateTries = 0
+		BWQ.xpOnlyRequested = nil  -- allow re-checking XP-only quests on fresh update cycle
 		BWQ:UpdateBlock()
 		BWQ.lastUpdate = currentTime
 	end
@@ -1361,12 +1396,11 @@ function BWQ:UpdateBlock()
 	end
 
 	BWQ:UpdateQuestData()
-	-- refreshing is limited to 3 runs and then gets forced to render the block
-	if BWQ.needsRefresh and BWQ.updateTries < 3 then
-		-- skip updating the block, received data was incomplete
-		BWQ.needsRefresh = false
-		return
-	end
+	-- Always render whatever data we have (XP-only is better than blank).
+	-- The retry mechanism in UpdateQuestData and event-driven refreshes
+	-- (GET_ITEM_INFO_RECEIVED, QUEST_DATA_LOAD_RESULT) will re-trigger
+	-- UpdateBlock when real reward data arrives.
+	BWQ.needsRefresh = false
 
 	local titleMaxWidth, bountyMaxWidth, factionMaxWidth, rewardMaxWidth, timeLeftMaxWidth = 0, 0, 0, 0, 0
 	for mapId in next, BWQ.MAP_ZONES[BWQ.expansion] do
@@ -1882,6 +1916,22 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		BWQ:RunUpdate()
 	elseif event == "QUEST_WATCH_LIST_CHANGED" then
 		BWQ:UpdateBlock()
+	elseif event == "GET_ITEM_INFO_RECEIVED" then
+		-- arg1 is the itemID that just loaded
+		if BWQ.pendingItemIDs and BWQ.pendingItemIDs[arg1] then
+			BWQ.pendingItemIDs[arg1] = nil
+			-- Bypass the 5-second RunUpdate throttle — this data just arrived
+			BWQ.updateTries = 0
+			BWQ:UpdateBlock()
+		end
+	elseif event == "QUEST_DATA_LOAD_RESULT" then
+		-- arg1 is the questID whose data just loaded.
+		-- Do NOT reset updateTries here — let the counter naturally cap
+		-- to prevent cascading re-requests for genuinely XP-only quests.
+		if BWQ.pendingQuestIDs and BWQ.pendingQuestIDs[arg1] then
+			BWQ.pendingQuestIDs[arg1] = nil
+			BWQ:UpdateBlock()
+		end
 	elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
 		BWQ:OnFactionUpdate(arg1)
 	elseif event == "PLAYER_ENTERING_WORLD" then
@@ -1977,6 +2027,8 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 
 		BWQ:RegisterEvent("QUEST_LOG_UPDATE")
 		BWQ:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
+		BWQ:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+		BWQ:RegisterEvent("QUEST_DATA_LOAD_RESULT")
 		if (not BWQ:C("hideFactionParagonBars")) then
 			BWQ:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 		end
