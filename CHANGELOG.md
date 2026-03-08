@@ -2,7 +2,9 @@
 * Improved quest reward loading: rewards now appear faster on login instead of showing XP placeholders
 * Fixed a bug where a single uncached item could prevent an entire zone's quests from displaying
 * Reduced taint issues causing tooltip errors when hovering world quest pins on the map
-(NOTE: There are still taint issues that are being worked on, but this should be a *little* better.)
+* **KNOWN BUGS**:
+  * Sometimes the window may "flash", showing all the rewards as XP rewards only.  This is a side effect of the fix mentioned above.  It should hopefully be fixed next release.
+  * There are still taint issues that are being worked on, but this should be a little better.
 
 ### 12.0.1.3
 * Added support for Silvermoon City
