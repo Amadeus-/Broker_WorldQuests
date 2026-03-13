@@ -1,3 +1,6 @@
+### 12.0.1.5
+* Added option "Use red arrow marker on world map" to toggle the bouncing red arrow that appears when clicking a quest row (Default: ON)
+
 ### 12.0.1.4
 * Improved quest reward loading: rewards now appear faster on login instead of showing XP placeholders
 * Fixed a bug where a single uncached item could prevent an entire zone's quests from displaying

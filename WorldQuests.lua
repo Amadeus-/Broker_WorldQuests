@@ -306,7 +306,7 @@ local Row_OnClick = function(row)
 				BWQ.expectMapChange = true
 				securecallfunction(WorldMapFrame.SetMapID, WorldMapFrame, mapId)
 				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
-				if quest.x and quest.y then
+				if quest.x and quest.y and BWQ:C("showRedArrowOnMap") then
 					local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
 					local scale = WorldMapFrame:GetCanvasScale()
 					local size = 30 / scale * 1.35
