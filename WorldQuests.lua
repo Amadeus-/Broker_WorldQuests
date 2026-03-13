@@ -1860,7 +1860,9 @@ function BWQ:AddFlightMapHook()
 	-- crash with secret values when hovering world quest pins during combat. By hooking
 	-- the FlightMapFrame instance, only the flight map is affected.
 	if FlightMapFrame then
-		hooksecurefunc(FlightMapFrame, "RefreshAllDataProviders", SetFlightMapPins)
+		hooksecurefunc(FlightMapFrame, "RefreshAllDataProviders", function(self)
+			C_Timer.After(0, function() SetFlightMapPins(self) end)
+		end)
 	end
 end
 
