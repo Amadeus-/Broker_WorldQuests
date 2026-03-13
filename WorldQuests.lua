@@ -191,6 +191,7 @@ end
 
 local ShowQuestObjectiveTooltip = function(row)
 	BWQ.tooltip:SetOwner(row, "ANCHOR_CURSOR")
+	if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
 	local color = WORLD_QUEST_QUALITY_COLORS[row.quest.quality]
 	BWQ.tooltip:AddLine(row.quest.title, color.r, color.g, color.b, true)
 
@@ -216,6 +217,7 @@ local ShowQuestLogItemTooltip = function(button)
 	local name, texture = GetQuestLogRewardInfo(1, button.quest.questID)
 	if name and texture then
 		BWQ.tooltip:SetOwner(button.reward, "ANCHOR_CURSOR")
+		if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
 		BWQ.ScanTooltip:SetQuestLogItem("reward", 1, button.quest.questID)
 		local _, itemLink = BWQ.ScanTooltip:GetItem()
 		BWQ.tooltip:SetHyperlink(itemLink)
@@ -225,6 +227,7 @@ end
 
 local ShowWorldQuestPOITooltip = function(button,poi)
     BWQ.tooltip:SetOwner(button, "ANCHOR_CURSOR")
+    if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
     BWQ.tooltip:SetText(poi.name)
 	if button.quest.LockedWQ then
 		local questsRemaining = button.quest.LockedWQ_questsRemaining or 0

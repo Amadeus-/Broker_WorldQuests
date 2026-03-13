@@ -102,6 +102,7 @@ function BWQ:ShowBountyTooltip(button, questID)
 	local title = C_QuestLog.GetTitleForLogIndex(questIndex)
 	if title then
 		GameTooltip:SetOwner(button, "ANCHOR_BOTTOM")
+		if GameTooltip.ItemTooltip then GameTooltip.ItemTooltip:Hide() end
 		GameTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB())
 
 		local questDescription
