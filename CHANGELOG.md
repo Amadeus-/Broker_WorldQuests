@@ -1,6 +1,6 @@
 ### 12.0.1.5
 * Added option "Use red arrow marker on world map" to toggle the bouncing red arrow that appears when clicking a quest row (Default: ON)
-* Fixed tooltip taint issues that could cause errors when interacting with world map quest pins
+* Fixed icons not displaying for several entries in the settings menu
 * Fixed tooltip taint issues that could cause errors when interacting with world map quest pins
 
 ### 12.0.1.4
