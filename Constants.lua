@@ -153,6 +153,8 @@ CONSTANTS.CURRENCIES_AFFECTED_BY_WARMODE = {
 	[2123] = true, -- Bloody Tokens (dragonflight)
 }
 
+-- If necessary, the following command can be used to get the icon IDs
+-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
 CONSTANTS.MIDNIGHT_REPUTATION_CURRENCY_IDS = {
 	[3354] = true, -- The Amani Tribe
 	[3389] = true, -- The Singularity

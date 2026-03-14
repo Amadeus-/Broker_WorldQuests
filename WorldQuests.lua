@@ -1816,7 +1816,7 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheGeneral") 			and BWQ.totalTheGeneral > 0				then brokerString = string.format("%s|TInterface\\Icons\\ui_notoriety_thegeneral:16:16|t %d  ", brokerString, BWQ.totalTheGeneral) end
 		if BWQ:C("brokerShowTheVizier") 			and BWQ.totalTheVizier > 0				then brokerString = string.format("%s|TInterface\\Icons\\ui_notoriety_thevizier:16:16|t %d  ", brokerString, BWQ.totalTheVizier) end
 		if BWQ:C("brokerShowWeatheredUndermineCrest") and BWQ.totalWeatheredUndermineCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_undermine_weathered:16:16|t %d  ", brokerString, BWQ.totalWeatheredUndermineCrest) end
-		if BWQ:C("brokerShowTwilightsBladeInsignia") and BWQ.totalTwilightsBladeInsignia > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv12_twilight_-blade_cultist_insignia:16:16|t %d  ", brokerString, BWQ.totalTwilightsBladeInsignia) end
+		if BWQ:C("brokerShowTwilightsBladeInsignia") and BWQ.totalTwilightsBladeInsignia > 0	then brokerString = string.format("%s|T7195171:16:16|t %d  ", brokerString, BWQ.totalTwilightsBladeInsignia) end
 		if BWQ:C("brokerShowCarvedUndermineCrest") 	and BWQ.totalCarvedUndermineCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_undermine_carved:16:16|t %d  ", brokerString, BWQ.totalCarvedUndermineCrest) end
 		if BWQ:C("brokerShowTheCartelsOfUndermine") and BWQ.totalTheCartelsOfUndermine > 0	then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfactions_rocket:16:16|t %d  ", brokerString, BWQ.totalTheCartelsOfUndermine) end
 		if BWQ:C("brokerShowTheBilgewaterCartel") 	and BWQ.totalTheBilgewaterCartel > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_1115_reputationcurrencies_bilgewater:16:16|t %d  ", brokerString, BWQ.totalTheBilgewaterCartel) end
@@ -1825,9 +1825,12 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheVentureCompany") 	and BWQ.totalTheVentureCompany > 0		then brokerString = string.format("%s|TInterface\\Icons\\inv_1115_reputationcurrencies_ventureco:16:16|t %d  ", brokerString, BWQ.totalTheVentureCompany) end
 		if BWQ:C("brokerShowWeatheredEtherealCrest") and BWQ.totalWeatheredEtherealCrest > 0	then brokerString = string.format("%s|TInterface\\Icons\\inv_crestupgrade_ethereal_weathered:16:16|t %d  ", brokerString, BWQ.totalWeatheredEtherealCrest) end
 		if BWQ:C("brokerShowVoidlightMarl") 		and BWQ.totalVoidlightMarl > 0			then brokerString = string.format("%s|TInterface\\Icons\\inv_112_raidtrinkets_voidprism:16:16|t %d  ", brokerString, BWQ.totalVoidlightMarl) end
-		if BWQ:C("brokerShowTheAmaniTribe") 		and BWQ.totalTheAmaniTribe > 0			then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-flames:16:16|t %d  ", brokerString, BWQ.totalTheAmaniTribe) end
-		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-sky:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
-		if BWQ:C("brokerShowTheHarati") 			and BWQ.totalTheHarati > 0 				then brokerString = string.format("%s|TInterface\\Icons\\ui_majorfaction_-vines:16:16|t %d  ", brokerString, BWQ.totalTheHarati) end
+		if BWQ:C("brokerShowTheAmaniTribe") 		and BWQ.totalTheAmaniTribe > 0			then brokerString = string.format("%s|T7505698:16:16|t %d  ", brokerString, BWQ.totalTheAmaniTribe) end
+		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|T7505702:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
+		if BWQ:C("brokerShowTheHarati") 			and BWQ.totalTheHarati > 0 				then brokerString = string.format("%s|T7505704:16:16|t %d  ", brokerString, BWQ.totalTheHarati) end
+
+		-- If necessary, the following command can be used to get the icon IDs above (3354 is an example of the factionID, as found in Constants.lua)
+		-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
 
 		if brokerString and brokerString ~= "" then
 			BWQ.WorldQuestsBroker.text = brokerString

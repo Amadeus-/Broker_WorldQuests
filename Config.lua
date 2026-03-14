@@ -116,6 +116,8 @@ end
 function BWQ:OpenConfigMenu(anchor)
 	MenuUtil.CreateContextMenu(anchor, function(ownerRegion, rootDescription)
 		-- Build options table fresh each time (for dynamic content like isHorde, TomTom)
+		-- If necessary, the following command can be used to get the icon IDs
+		-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID		
 		local options = {
 			{ text = "Attach list frame to world map", check = "attachToWorldMap" },
 			{ text = "Show list frame on click instead of mouse-over", check = "showOnClick" },
@@ -171,7 +173,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The General"):format("Interface\\Icons\\ui_notoriety_thegeneral"), check = "brokerShowTheGeneral" },
 					{ text = ("|T%1$s:16:16|t  The Vizier"):format("Interface\\Icons\\ui_notoriety_thevizier"), check = "brokerShowTheVizier" },
 					{ text = ("|T%1$s:16:16|t  Weathered Undermine Crest"):format("Interface\\Icons\\inv_crestupgrade_undermine_weathered"), check = "brokerShowWeatheredUndermineCrest" },
-					{ text = ("|T%1$s:16:16|t  Twilight's Blade Insignia"):format("Interface\\Icons\\inv12_twilight_-blade_cultist_insignia"), check = "brokerShowTwilightsBladeInsignia" },
+					{ text = ("|T%1$s:16:16|t  Twilight's Blade Insignia"):format("7195171"), check = "brokerShowTwilightsBladeInsignia" },
 					{ text = ("|T%1$s:16:16|t  Carved Undermine Crest"):format("Interface\\Icons\\inv_crestupgrade_undermine_carved"), check = "brokerShowCarvedUndermineCrest" },
 					{ text = ("|T%1$s:16:16|t  The Cartels of Undermine"):format("Interface\\Icons\\ui_majorfactions_rocket"), check = "brokerShowTheCartelsOfUndermine" },
 					{ text = ("|T%1$s:16:16|t  The Bilgewater Cartel"):format("Interface\\Icons\\inv_1115_reputationcurrencies_bilgewater"), check = "brokerShowTheBilgewaterCartel" },
@@ -180,10 +182,12 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Venture Company"):format("Interface\\Icons\\inv_1115_reputationcurrencies_ventureco"), check = "brokerShowTheVentureCompany" },
 					{ text = ("|T%1$s:16:16|t  Weathered Ethereal Crest"):format("Interface\\Icons\\inv_crestupgrade_ethereal_weathered"), check = "brokerShowWeatheredEtherealCrest" },
 					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "brokerShowVoidlightMarl" },
-					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "brokerShowTheAmaniTribe" },
-					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "brokerShowTheSingularity" },
-					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("Interface\\Icons\\ui_majorfaction_-vines"), check = "brokerShowTheHarati" },
+					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("7505698"), check = "brokerShowTheAmaniTribe" },
+					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "brokerShowTheSingularity" },
+					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "brokerShowTheHarati" },
 				}
+				-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
+				-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
 			},
 			{ text = "Sort list by time remaining instead of reward type", check = "sortByTimeRemaining" },
 			{ text = "Show 'NEW' text for recently found world quests", check = "showNEWTextWhenAppropriate" },
@@ -202,11 +206,13 @@ function BWQ:OpenConfigMenu(anchor)
 			{ text = ("|T%1$s:16:16|t  Bloody Tokens"):format("Interface\\Icons\\inv_10_dungeonjewelry_titan_trinket_2_color2"), check = "showBloodyTokens" },
 			{ text = ("|T%1$s:16:16|t  Low gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showLowGold" },
 			{ text = ("|T%1$s:16:16|t  High gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showHighGold" },
+			-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
+			-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
 			{ text = "      Midnight", submenu = {
 					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "showVoidlightMarl" },
-					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("Interface\\Icons\\ui_majorfaction_-flames"), check = "showTheAmaniTribe" },
-					{ text = ("|T%1$s:16:16|t  The Singularity"):format("Interface\\Icons\\ui_majorfaction_-sky"), check = "showTheSingularity" },
-					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("Interface\\Icons\\ui_majorfaction_-vines"), check = "showTheHarati" },
+					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("7505698"), check = "showTheAmaniTribe" },
+					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "showTheSingularity" },
+					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "showTheHarati" },
 				}
 			},
 			{ text = "      The War Within", submenu = {
@@ -221,7 +227,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The General"):format("Interface\\Icons\\ui_notoriety_thegeneral"), check = "showTheGeneral" },
 					{ text = ("|T%1$s:16:16|t  The Vizier"):format("Interface\\Icons\\ui_notoriety_thevizier"), check = "showTheVizier" },
 					{ text = ("|T%1$s:16:16|t  Weathered Undermine Crest"):format("Interface\\Icons\\inv_crestupgrade_undermine_weathered"), check = "showWeatheredUndermineCrest" },
-					{ text = ("|T%1$s:16:16|t  Twilight's Blade Insignia"):format("Interface\\Icons\\inv12_twilight_-blade_cultist_insignia"), check = "showTwilightsBladeInsignia" },
+					{ text = ("|T%1$s:16:16|t  Twilight's Blade Insignia"):format("7195171"), check = "showTwilightsBladeInsignia" },
 					{ text = ("|T%1$s:16:16|t  Carved Undermine Crest"):format("Interface\\Icons\\inv_crestupgrade_undermine_carved"), check = "showCarvedUndermineCrest" },
 					{ text = ("|T%1$s:16:16|t  The Cartels of Undermine"):format("Interface\\Icons\\ui_majorfactions_rocket"), check = "showTheCartelsOfUndermine" },
 					{ text = ("|T%1$s:16:16|t  The Bilgewater Cartel"):format("Interface\\Icons\\inv_1115_reputationcurrencies_bilgewater"), check = "showTheBilgewaterCartel" },

@@ -1,7 +1,10 @@
 ### 12.0.1.5
 * Added option "Use red arrow marker on world map" to toggle the bouncing red arrow that appears when clicking a quest row (Default: ON)
 * Fixed icons not displaying for several entries in the settings menu
+* Fixed icons not displaying for Midnight factions and Twilight's Blade Insignia in settings menu and broker text
 * Fixed tooltip taint issues that could cause errors when interacting with world map quest pins
+* **KNOWN BUGS**:
+  * There are still taint issues that are being worked on, but this version should be better than the last one.
 
 ### 12.0.1.4
 * Improved quest reward loading: rewards now appear faster on login instead of showing XP placeholders
