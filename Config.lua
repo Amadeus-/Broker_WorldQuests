@@ -123,7 +123,7 @@ function BWQ:OpenConfigMenu(anchor)
 			{ text = "Show list frame on click instead of mouse-over", check = "showOnClick" },
 			{ text = "Auto switch expansions based on current zone", check = "autoChooseExpansionOnZone" },
 			{ text = "Use per-character settings", check = "usePerCharacterSettings" },
-			{ text = "Disable all click actions except to open map", check = "readOnlyMode" },
+			{ text = "Disable shift-click tracking and world map 'bouncing red arrow'", check = "readOnlyMode" },
 			{ text = "" },
 			{ text = "Always show |cffa335eeepic|r world quests (e.g. world bosses)", check = "alwaysShowEpicQuests" },
 			{ text = "Only show world quests with |cff0070ddrare|r or above quality", check = "onlyShowRareOrAbove" },
