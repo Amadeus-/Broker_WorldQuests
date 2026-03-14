@@ -268,6 +268,20 @@ end
 -- pragmatic approach used by major addons like Zygor.
 local Row_OnClick = function(button)
 	if not button.quest then return end
+	if BWQ:C("readOnlyMode") then
+		if IsShiftKeyDown() then return end
+		-- Read-only mode: only open the map, nothing else
+		local mapId = button.mapId
+		C_Timer.After(0, function()
+			if OpenWorldMap then
+				OpenWorldMap(mapId)
+			else
+				securecallfunction(ShowUIPanel, WorldMapFrame)
+				securecallfunction(WorldMapFrame.SetMapID, WorldMapFrame, mapId)
+			end
+		end)
+		return
+	end
 	local questID = button.quest.questID
 
 	if IsShiftKeyDown() then

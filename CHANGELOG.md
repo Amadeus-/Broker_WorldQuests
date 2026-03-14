@@ -1,3 +1,9 @@
+### 12.0.1.6
+* Added: "Disable all click actions except to open map" setting that disables quest row shift-click action and also disables the "red arrow" on the main map. When enabled, the only click functionality is that when you left click a quest, the main map will open to that zone. (Tooltips and all visual features remain fully functional.)   This is currently OFF by default.
+* Fixed: GameTooltip taint errors when hovering world quest pins on the map. 
+* Replaced shared GameTooltip with a private tooltip to prevent taint propagation. 
+* Switched map navigation to use OpenWorldMap() API and deferred arrow overlay frame creation to first use.
+
 ### 12.0.1.5
 * Added option "Use red arrow marker on world map" to toggle the bouncing red arrow that appears when clicking a quest row (Default: ON)
 * Fixed icons not displaying for several entries in the settings menu
