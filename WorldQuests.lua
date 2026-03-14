@@ -310,19 +310,17 @@ local Row_OnClick = function(button)
 			-- Flag that the addon changed the map
 			BWQ.expectMapChange = true
 
-			-- Arrow positioning (if enabled)
-			if BWQ:C("showRedArrowOnMap") then
-				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
-				if quest.x and quest.y then
-					local mt = BWQ.EnsureMapTextures()
-					local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
-					local scale = WorldMapFrame:GetCanvasScale()
-					local size = 30 / scale * 1.35
-					mt:ClearAllPoints()
-					mt.highlightArrow:SetSize(size, size)
-					mt:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
-					mt.animationGroup:Play()
-				end
+			-- Arrow positioning
+			if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
+			if quest.x and quest.y then
+				local mt = BWQ.EnsureMapTextures()
+				local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
+				local scale = WorldMapFrame:GetCanvasScale()
+				local size = 30 / scale * 1.35
+				mt:ClearAllPoints()
+				mt.highlightArrow:SetSize(size, size)
+				mt:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
+				mt.animationGroup:Play()
 			end
 		end)
 
