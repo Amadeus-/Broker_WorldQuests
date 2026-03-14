@@ -3,6 +3,7 @@
 * Fixed: GameTooltip taint errors when hovering world quest pins on the map. 
 * Replaced shared GameTooltip with a private tooltip to prevent taint propagation. 
 * Switched map navigation to use OpenWorldMap() API and deferred arrow overlay frame creation to first use.
+* Fixed: EventRegistry callback owner key taint leak that could taint world map pins even without clicking quest rows. Switched to anonymous owner keys via RegisterCallbackWithHandle.
 
 ### 12.0.1.5
 * Fixed icons not displaying for several entries in the settings menu

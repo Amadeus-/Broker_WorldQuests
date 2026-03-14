@@ -2002,17 +2002,20 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		-- (which fires naturally when the user navigates to a different zone on the map).
 
 		-- WorldMapFrame Hide: use EventRegistry event (fires at end of WorldMapMixin:OnHide)
-		EventRegistry:RegisterCallback("WorldMapOnHide", function()
+		-- TAINT FIX (Fix 15): Use RegisterCallbackWithHandle to avoid inserting tainted BWQ
+		-- frame as owner key into EventRegistry's callback table. secureexecuterange iterates
+		-- that table during WorldMapMixin:OnShow, and a tainted key can leak residual taint.
+		BWQ.worldMapOnHideHandle = EventRegistry:RegisterCallbackWithHandle("WorldMapOnHide", function()
 			if BWQ:C("attachToWorldMap") then
 				BWQ:Hide()
 			end
 			if BWQ.mapTextures then BWQ.mapTextures.animationGroup:Stop() end
 			BWQ.currentMapId = nil
 			BWQ.expectMapChange = nil
-		end, BWQ)
+		end)
 
 		-- WorldMapFrame Show: use EventRegistry event (fires at end of WorldMapMixin:OnShow)
-		EventRegistry:RegisterCallback("WorldMapOnShow", function()
+		BWQ.worldMapOnShowHandle = EventRegistry:RegisterCallbackWithHandle("WorldMapOnShow", function()
 			-- Initialize currentMapId so the QUEST_LOG_UPDATE handler can detect
 			-- subsequent map changes without needing a hooksecurefunc on OnMapChanged.
 			BWQ.currentMapId = WorldMapFrame:GetMapID()
@@ -2020,7 +2023,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				BWQ:AttachToWorldMap()
 				BWQ:RunUpdate()
 			end
-		end, BWQ)
+		end)
 
 		-- TAINT FIX (12.0.0+): OnMapChanged detection moved to QUEST_LOG_UPDATE handler.
 		-- We no longer hook WorldMapFrame:OnMapChanged() because even with C_Timer.After(0)
