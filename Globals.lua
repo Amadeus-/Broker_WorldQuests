@@ -26,7 +26,6 @@ BWQ.updateTries = 0
 BWQ.needsRefresh = false
 BWQ.TomTomWaypoints = {}
 BWQ.locale = GetLocale()
-BWQ.tooltip = GameTooltip
 BWQ.mapID = 0
 
 -- When adding zones to MAP_ZONES, be sure to also add the zoneID to MAP_ZONES_SORT immediately below

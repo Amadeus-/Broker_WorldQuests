@@ -70,7 +70,7 @@ function BWQ:UpdateBountyData()
 			bountyCacheItem.text:SetPoint("LEFT", bountyCacheItem.icon, "RIGHT", 5, -2)
 
 			bountyCacheItem.button:SetScript("OnEnter", function(self) BWQ:ShowBountyTooltip(self, bounty.questID) end)
-			bountyCacheItem.button:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
+			bountyCacheItem.button:SetScript("OnLeave", function(self) BWQ.tooltip:Hide() end)
 			
 			bountyWidth = bountyWidth + bountyCacheItem.text:GetStringWidth() + 33
 		end
@@ -101,9 +101,9 @@ function BWQ:ShowBountyTooltip(button, questID)
 	local questIndex = C_QuestLog.GetLogIndexForQuestID(questID)
 	local title = C_QuestLog.GetTitleForLogIndex(questIndex)
 	if title then
-		GameTooltip:SetOwner(button, "ANCHOR_BOTTOM")
-		if GameTooltip.ItemTooltip then GameTooltip.ItemTooltip:Hide() end
-		GameTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB())
+		BWQ.tooltip:SetOwner(button, "ANCHOR_BOTTOM")
+		if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
+		BWQ.tooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB())
 
 		local questDescription
 		if C_QuestLog.GetQuestText then
@@ -113,16 +113,16 @@ function BWQ:ShowBountyTooltip(button, questID)
 			_, questDescription = GetQuestLogQuestText(questIndex)
 		end
 
-		GameTooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+		BWQ.tooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 
 		local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questID, 1, false)
 		if objectiveText and #objectiveText > 0 then
 			local color = finished and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR;
-			GameTooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
+			BWQ.tooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
 		end
 
-		pcall(GameTooltip_AddQuestRewardsToTooltip, GameTooltip, questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD)
-		GameTooltip:Show()
+		pcall(GameTooltip_AddQuestRewardsToTooltip, BWQ.tooltip, questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD)
+		BWQ.tooltip:Show()
 		button.UpdateTooltip = function(self) BWQ:ShowBountyTooltip(button, questID) end
 	end
 end

@@ -261,34 +261,17 @@ function BWQ:CalculateMapPosition(x, y)
 	return x * WorldMapFrame:GetCanvas():GetWidth() , -1 * y * WorldMapFrame:GetCanvas():GetHeight() 
 end
 
-local Row_OnClick = function(row)
-	-- TAINT FIX (12.0.0+): Prevent quest watch / world map API calls from propagating
-	-- addon taint into Blizzard's secure execution chains.
-	--
-	-- Root cause: When addon code calls C_QuestLog.AddWorldQuestWatch() or
-	-- RemoveWorldQuestWatch(), the resulting QUEST_WATCH_LIST_CHANGED event carries
-	-- "forward taint" from the addon. Blizzard's SuperTrackEventMixin handles this
-	-- event and may call C_SuperTrack.SetSuperTrackedQuestID(0), which fires
-	-- SUPER_TRACKING_CHANGED -- also tainted. This cascades through:
-	--   EventRegistry:TriggerEvent("Supertracking.OnChanged")
-	--   -> QuestDataProvider:RefreshAllData -> AcquirePin
-	--   -> CheckMouseButtonPassthrough -> SetPassThroughButtons (BLOCKED)
-	--
-	-- Similarly, ShowUIPanel(WorldMapFrame) / WorldMapFrame:SetMapID() triggers
-	-- OnMapChanged -> secureexecuterange(dataProviders) -> AcquirePin -> BLOCKED.
-	--
-	-- C_Timer.After(0) alone does NOT break this taint: the timer callback closure
-	-- is still associated with the addon that created it, so all API calls within it
-	-- execute in a tainted context, and events they fire carry that taint forward.
-	--
-	-- FIX: Use securecallfunction() to call the C APIs. securecallfunction() executes
-	-- a function in its OWN security context. Since C_QuestLog.AddWorldQuestWatch etc.
-	-- are C++ (secure) functions, securecallfunction() calls them in a secure context,
-	-- and the resulting game events do NOT carry addon taint. We still use C_Timer.After(0)
-	-- to defer execution out of the click handler's synchronous call chain.
+-- Click handler for quest row buttons.
+-- Uses C_Timer.After(0, ...) deferral and securecallfunction wrapping to minimize
+-- taint propagation. Uses OpenWorldMap() for navigation (single C++ call).
+-- Note: Some taint may still occur from C++ event attribution; this is the same
+-- pragmatic approach used by major addons like Zygor.
+local Row_OnClick = function(button)
+	if not button.quest then return end
+	local questID = button.quest.questID
 
 	if IsShiftKeyDown() then
-		local questID = row.quest.questID
+		-- Track/untrack world quest (deferred to break taint chain)
 		C_Timer.After(0, function()
 			if C_QuestLog.GetQuestWatchType(questID) == Enum.QuestWatchType.Manual or C_SuperTrack.GetSuperTrackedQuestID() == questID then
 				securecallfunction(C_QuestLog.RemoveWorldQuestWatch, questID)
@@ -297,30 +280,39 @@ local Row_OnClick = function(row)
 			end
 		end)
 	else
-		-- Capture values before deferring (row is a reused button frame)
-		local mapId = row.mapId
-		local quest = row.quest
+		-- Navigate to quest on world map (deferred)
+		local mapId = button.mapId
+		local quest = button.quest
 
 		C_Timer.After(0, function()
-			if not WorldMapFrame:IsShown() then securecallfunction(ShowUIPanel, WorldMapFrame) end
-			if WorldMapFrame:IsShown() then
-				-- Flag that the addon is about to change the map, so the
-				-- QUEST_LOG_UPDATE handler won't stop the ping animation.
-				BWQ.expectMapChange = true
+			-- Use OpenWorldMap when available (single C++ call)
+			if OpenWorldMap then
+				OpenWorldMap(mapId)
+			else
+				securecallfunction(ShowUIPanel, WorldMapFrame)
 				securecallfunction(WorldMapFrame.SetMapID, WorldMapFrame, mapId)
+			end
+
+			-- Flag that the addon changed the map
+			BWQ.expectMapChange = true
+
+			-- Arrow positioning (if enabled)
+			if BWQ:C("showRedArrowOnMap") then
 				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
-				if quest.x and quest.y and BWQ:C("showRedArrowOnMap") then
+				if quest.x and quest.y then
+					local mt = BWQ.EnsureMapTextures()
 					local x, y = BWQ:CalculateMapPosition(quest.x, quest.y)
 					local scale = WorldMapFrame:GetCanvasScale()
 					local size = 30 / scale * 1.35
-					BWQ.mapTextures:ClearAllPoints()
-					BWQ.mapTextures.highlightArrow:SetSize(size, size)
-					BWQ.mapTextures:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
-					BWQ.mapTextures.animationGroup:Play()
+					mt:ClearAllPoints()
+					mt.highlightArrow:SetSize(size, size)
+					mt:SetPoint("CENTER", WorldMapFrame:GetCanvas(), "TOPLEFT", x, y + 25 + (scale < 0.5 and 50 or 0))
+					mt.animationGroup:Play()
 				end
 			end
 		end)
 
+		-- TomTom integration (outside the deferred block -- doesn't need map open)
 		if TomTom and BWQ:C("enableTomTomWaypointsOnClick") then
 			if C_AddOns.IsAddOnLoaded("TomTom") then
 				if not quest.x or not quest.y then BWQ:QueryZoneQuestCoordinates(mapId) end
@@ -1459,7 +1451,7 @@ function BWQ:UpdateBlock()
 					button:SetScript("OnLeave", function()				BWQ:Block_OnLeave()				button.highlight:SetAlpha(0)			end)
 					button:SetScript("OnEnter", function(self)			button.highlight:SetAlpha(1)											end)
 
-					button:SetScript("OnClick", function(self)			Row_OnClick(button)														end)
+					button:SetScript("OnClick", function(self)			Row_OnClick(button)													end)
 
 					button.icon = button:CreateTexture()
 					button.icon:SetSize(12, 12)
@@ -1468,7 +1460,8 @@ function BWQ:UpdateBlock()
 
 					-- create font strings
 					button.title = CreateFrame("Button", nil, button)
-					button.title:SetScript("OnClick", function(self)	Row_OnClick(button)																end)
+					button.title:RegisterForClicks("AnyUp")
+					button.title:SetScript("OnClick", function(self)	Row_OnClick(button)													end)
 					button.title:SetScript("OnEnter", function(self)	button.highlight:SetAlpha(1)	ShowQuestObjectiveTooltip(button)				end)
 					button.title:SetScript("OnLeave", function()		button.highlight:SetAlpha(0)	BWQ.tooltip:Hide()		BWQ:Block_OnLeave()		end)
 
@@ -1493,7 +1486,8 @@ function BWQ:UpdateBlock()
 					button.factionFS:SetWordWrap(false)
 
 					button.reward = CreateFrame("Button", nil, button)
-					button.reward:SetScript("OnClick", function(self)	Row_OnClick(button)														end)
+					button.reward:RegisterForClicks("AnyUp")
+					button.reward:SetScript("OnClick", function(self)	Row_OnClick(button)													end)
 
 					button.rewardFS = button.reward:CreateFontString("BWQrewardFS", "OVERLAY", "SystemFont_Shadow_Med1")
 					button.rewardFS:SetJustifyH("LEFT")
@@ -1912,7 +1906,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				-- itself opened/navigated the map to show the ping, so keep it.
 				if BWQ.expectMapChange then
 					BWQ.expectMapChange = nil
-				else
+				elseif BWQ.mapTextures then
 					BWQ.mapTextures.animationGroup:Stop()
 				end
 				BWQ.currentMapId = currentMapId
@@ -2000,7 +1994,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 			if BWQ:C("attachToWorldMap") then
 				BWQ:Hide()
 			end
-			BWQ.mapTextures.animationGroup:Stop()
+			if BWQ.mapTextures then BWQ.mapTextures.animationGroup:Stop() end
 			BWQ.currentMapId = nil
 			BWQ.expectMapChange = nil
 		end, BWQ)
