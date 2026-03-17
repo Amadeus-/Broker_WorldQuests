@@ -122,6 +122,9 @@ function BWQ:ShowBountyTooltip(button, questID)
 		end
 
 		pcall(GameTooltip_AddQuestRewardsToTooltip, BWQ.tooltip, questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD)
+		-- Hide ItemTooltip if it was re-shown by AddQuestRewardsToTooltip, so that
+		-- Show() -> CalculatePadding takes the early return path (no arithmetic on dimensions)
+		if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
 		BWQ.tooltip:Show()
 		button.UpdateTooltip = function(self) BWQ:ShowBountyTooltip(button, questID) end
 	end
