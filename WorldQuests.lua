@@ -221,7 +221,7 @@ local ShowQuestLogItemTooltip = function(button)
 		BWQ.ScanTooltip:SetQuestLogItem("reward", 1, button.quest.questID)
 		local _, itemLink = BWQ.ScanTooltip:GetItem()
 		BWQ.tooltip:SetHyperlink(itemLink)
-		BWQ.tooltip:Show()
+		-- No Show() needed — SetHyperlink shows via Blizzard's secure data handler pipeline
 	end
 end
 
