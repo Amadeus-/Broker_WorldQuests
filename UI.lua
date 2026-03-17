@@ -128,14 +128,12 @@ BWQ.slider:Hide()
 BWQ.ScanTooltip = CreateFrame("GameTooltip", "BWQScanTooltip", nil, "GameTooltipTemplate,BackdropTemplate")
 BWQ.ScanTooltip:Hide()
 
--- Private display tooltip (avoids tainting the shared GameTooltip)
-BWQ.tooltip = CreateFrame("GameTooltip", "BWQTooltip", UIParent, "GameTooltipTemplate,BackdropTemplate")
-BWQ.tooltip:Hide()
--- Enable automatic item comparison tooltips (shift+hover shows equipped vs reward).
--- The global GameTooltip gets this via a KeyValue in XML; custom tooltips need it set manually.
--- TooltipDataRules.FinalizeItemTooltip checks this flag before calling GameTooltip_ShowCompareItem.
-BWQ.tooltip.supportsItemComparison = true
-BWQ.tooltip.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2 }
+-- Use the shared GameTooltip
+-- IMPORTANT: Do NOT call Show() after SetHyperlink/SetBagItem — these functions
+-- show the tooltip through Blizzard's secure data handler pipeline. An explicit
+-- Show() triggers a second OnShow -> GameTooltip_CalculatePadding in addon context,
+-- which taints the tooltip's padding/dimensions.
+BWQ.tooltip = GameTooltip
 
 --==========================================================
 -- Events
