@@ -1,4 +1,5 @@
 ### 12.0.1.6
+* Added support for Coffer Key Shards currency
 * Added: "Disable shift-click tracking and world map 'bouncing red arrow'" setting that disables quest row shift-click action and also disables the "red arrow" on the main map. When enabled, the only click functionality is that when you left click a quest, the main map will open to that zone. (Tooltips and all visual features remain fully functional.) This is currently OFF by default.
 * Fixed: GameTooltip taint errors when hovering world quest pins on the map. 
 * Replaced shared GameTooltip with a private tooltip to prevent taint propagation. 

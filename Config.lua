@@ -185,6 +185,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("7505698"), check = "brokerShowTheAmaniTribe" },
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "brokerShowTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "brokerShowTheHarati" },
+					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "brokerShowCofferKeyShards" },
 				}
 				-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
 				-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
@@ -213,6 +214,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("7505698"), check = "showTheAmaniTribe" },
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "showTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "showTheHarati" },
+					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "showCofferKeyShards" },
 				}
 			},
 			{ text = "      The War Within", submenu = {
@@ -448,6 +450,7 @@ BWQ.defaultConfig = {
 		brokerShowTheAmaniTribe = true,
 		brokerShowTheSingularity = true,
 		brokerShowTheHarati = true,
+		brokerShowCofferKeyShards = true,
 	sortByTimeRemaining = false,
 	showNEWTextWhenAppropriate = true,
 	-- reward type
@@ -491,6 +494,7 @@ BWQ.defaultConfig = {
 	showTheAmaniTribe = true,
 	showTheSingularity = true,
 	showTheHarati = true,
+	showCofferKeyShards = true,
 	showItems = true,
 		showGear = true,
 		showRelics = true,
