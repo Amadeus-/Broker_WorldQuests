@@ -126,6 +126,5 @@ function BWQ:ShowBountyTooltip(button, questID)
 		-- Show() -> CalculatePadding takes the early return path (no arithmetic on dimensions)
 		if BWQ.tooltip.ItemTooltip then BWQ.tooltip.ItemTooltip:Hide() end
 		BWQ.tooltip:Show()
-		button.UpdateTooltip = function(self) BWQ:ShowBountyTooltip(button, questID) end
 	end
 end
