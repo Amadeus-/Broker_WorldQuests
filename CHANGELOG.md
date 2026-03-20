@@ -1,6 +1,7 @@
 ### 12.0.1.7
 * Coalesced event-driven update triggers to prevent cascading rebuilds. Events like GET_ITEM_INFO_RECEIVED and QUEST_DATA_LOAD_RESULT previously triggered a full UI rebuild per quest on cold login, causing CPU spikes. All event-driven updates are now batched into a single deferred call, significantly reducing CPU usage during login and zone transitions.
 * Removed per-frame bounty tooltip rebuild. Previously, hovering a bounty icon caused the tooltip to be reconstructed every frame (60+ times/second) via UpdateTooltip. The tooltip is now built once on mouse enter, eliminating a significant source of continuous CPU usage during hover.
+* Split UpdateBlock into data collection and UI rendering phases. UI construction and layout (the most expensive part) now only runs when the frame is actually visible. When hidden, data and broker text are updated but UI rendering is deferred until the frame is next shown.
 
 ### 12.0.1.6
 * Added support for Coffer Key Shards currency

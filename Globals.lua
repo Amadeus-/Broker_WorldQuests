@@ -24,6 +24,7 @@ BWQ.hasUnlockedWorldQuests = false
 BWQ.lastUpdate = 0
 BWQ.updateTries = 0
 BWQ.needsRefresh = false
+BWQ.uiDirty = false
 BWQ.TomTomWaypoints = {}
 BWQ.locale = GetLocale()
 BWQ.mapID = 0

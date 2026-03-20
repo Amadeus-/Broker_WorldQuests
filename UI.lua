@@ -152,6 +152,11 @@ function BWQ:Block_OnLeave()
 	end
 end
 BWQ:SetScript("OnLeave", function() BWQ:Block_OnLeave() end)
+BWQ:SetScript("OnShow", function()
+	if BWQ.uiDirty then
+		BWQ:UpdateUI()
+	end
+end)
 
 --==========================================================
 -- Super Track Map Ping (lazily created on first use)
