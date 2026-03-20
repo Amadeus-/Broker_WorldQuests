@@ -1982,6 +1982,24 @@ function BWQ:UpdateUI()
 	BWQ:RenderRows()
 end
 
+function BWQ:RefreshTrackingVisuals()
+	if not BWQ.expansion or not BWQ.MAP_ZONES[BWQ.expansion] then return end
+	local superTrackedID = C_SuperTrack.GetSuperTrackedQuestID()
+	for mapId, zone in next, BWQ.MAP_ZONES[BWQ.expansion] do
+		if zone.buttons then
+			for _, button in ipairs(zone.buttons) do
+				if button.quest and button.quest.questID and button:IsShown() then
+					if C_QuestLog.GetQuestWatchType(button.quest.questID) == Enum.QuestWatchType.Manual or superTrackedID == button.quest.questID then
+						button.track:Show()
+					else
+						button.track:Hide()
+					end
+				end
+			end
+		end
+	end
+end
+
 local SetFlightMapPins = function(self)
 	for pin, active in self:EnumeratePinsByTemplate("FlightMap_WorldQuestPinTemplate") do
 		if C_SuperTrack.GetSuperTrackedQuestID() == pin.questID then
@@ -2074,7 +2092,9 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		end
 		BWQ:RunUpdate()
 	elseif event == "QUEST_WATCH_LIST_CHANGED" then
-		BWQ:ScheduleUpdate()
+		if BWQ:IsShown() then
+			BWQ:RefreshTrackingVisuals()
+		end
 	elseif event == "GET_ITEM_INFO_RECEIVED" then
 		-- arg1 is the itemID that just loaded
 		if BWQ.pendingItemIDs and BWQ.pendingItemIDs[arg1] then

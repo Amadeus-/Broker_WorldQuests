@@ -1,9 +1,11 @@
 ### 12.0.1.7
+## Performance Updates
 * Cached static quest data in RetrieveWorldQuests. Previously, every update re-fetched all data from the API for every quest. Static data is now cached after the first successful fetch, eliminating ~1,200-1,500 redundant API calls per update. Volatile data (time remaining, visibility filters, reward totals, etc.) continues to refresh on every cycle.
 * Fixed infinite update retry loop when the world map is open. The retry counter was being reset every 5 seconds by passive QUEST_LOG_UPDATE events, preventing the retry chain from capping out. Now only user-initiated actions reset the retry counter, and redundant updates are skipped when one is already pending.
 * Coalesced event-driven update triggers to prevent cascading rebuilds. Events like GET_ITEM_INFO_RECEIVED and QUEST_DATA_LOAD_RESULT previously triggered a full UI rebuild per quest on cold login, causing CPU spikes. All event-driven updates are now batched into a single deferred call, significantly reducing CPU usage during login and zone transitions.
 * Removed per-frame bounty tooltip rebuild. Previously, hovering a bounty icon caused the tooltip to be reconstructed every frame via UpdateTooltip. The tooltip is now built once on mouse enter, eliminating a significant source of continuous CPU usage during hover.
 * Split UpdateBlock into data collection and UI rendering phases. UI construction and layout now only runs when the frame is actually visible. When hidden, data and broker text are updated but UI rendering is deferred until the frame is next shown.
+* Replaced full data rebuild on quest watch/tracking changes with a lightweight visual refresh. Previously, toggling quest tracking triggered a complete rebuild of all zone data and the retry chain, causing sustained CPU spikes. Now only the tracking icon on visible buttons is updated.
 
 ### 12.0.1.6
 * Added support for Coffer Key Shards currency
