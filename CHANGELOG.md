@@ -1,3 +1,6 @@
+### 12.0.1.7
+* Coalesced event-driven update triggers to prevent cascading rebuilds. Events like GET_ITEM_INFO_RECEIVED and QUEST_DATA_LOAD_RESULT previously triggered a full UI rebuild per quest on cold login, causing CPU spikes. All event-driven updates are now batched into a single deferred call, significantly reducing CPU usage during login and zone transitions.
+
 ### 12.0.1.6
 * Added support for Coffer Key Shards currency
 * Added: "Disable shift-click tracking and world map 'bouncing red arrow'" setting that disables quest row shift-click action and also disables the "red arrow" on the main map. When enabled, the only click functionality is that when you left click a quest, the main map will open to that zone. (Tooltips and all visual features remain fully functional.) This is currently OFF by default.

@@ -1247,7 +1247,7 @@ function BWQ:UpdateQuestData()
 		BWQ.updateTries = BWQ.updateTries + 1
 		-- Progressive delay: 0.5s, 0.5s, 1s, 1s, 2s, 2s, 3s, 3s, 5s, 5s
 		local delay = BWQ.updateTries <= 2 and 0.5 or BWQ.updateTries <= 4 and 1 or BWQ.updateTries <= 6 and 2 or BWQ.updateTries <= 8 and 3 or 5
-		C_Timer.After(delay, function() BWQ:UpdateBlock() end)
+		C_Timer.After(delay, function() BWQ:ScheduleUpdate() end)
 	end
 end
 
@@ -1386,6 +1386,18 @@ function BWQ:HideRowsOfInactiveExpansions()
 	end
 	BWQ.slider:Hide()
 	BWQ:UpdateBountyData()
+end
+
+BWQ.updatePending = false
+
+function BWQ:ScheduleUpdate()
+	if not self.updatePending then
+		self.updatePending = true
+		C_Timer.After(0.1, function()
+			self.updatePending = false
+			self:UpdateBlock()
+		end)
+	end
 end
 
 function BWQ:RunUpdate()
@@ -1936,14 +1948,12 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		end
 		BWQ:RunUpdate()
 	elseif event == "QUEST_WATCH_LIST_CHANGED" then
-		BWQ:UpdateBlock()
+		BWQ:ScheduleUpdate()
 	elseif event == "GET_ITEM_INFO_RECEIVED" then
 		-- arg1 is the itemID that just loaded
 		if BWQ.pendingItemIDs and BWQ.pendingItemIDs[arg1] then
 			BWQ.pendingItemIDs[arg1] = nil
-			-- Bypass the 5-second RunUpdate throttle — this data just arrived
-			BWQ.updateTries = 0
-			BWQ:UpdateBlock()
+			BWQ:ScheduleUpdate()
 		end
 	elseif event == "QUEST_DATA_LOAD_RESULT" then
 		-- arg1 is the questID whose data just loaded.
@@ -1951,7 +1961,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		-- to prevent cascading re-requests for genuinely XP-only quests.
 		if BWQ.pendingQuestIDs and BWQ.pendingQuestIDs[arg1] then
 			BWQ.pendingQuestIDs[arg1] = nil
-			BWQ:UpdateBlock()
+			BWQ:ScheduleUpdate()
 		end
 	elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
 		BWQ:OnFactionUpdate(arg1)
