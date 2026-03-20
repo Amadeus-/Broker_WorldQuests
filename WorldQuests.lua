@@ -398,7 +398,9 @@ local RetrieveWorldQuests = function(mapId)
 					end
 
 					quest.hide = true
-					quest.sort = 0
+					if not quest.rewardCached then
+						quest.sort = 0
+					end
 
 					-- C_TaskQuest.GetQuestsOnMap fields
 					quest.questID = questID
@@ -406,25 +408,41 @@ local RetrieveWorldQuests = function(mapId)
 					quest.xFlight = q.x
 					quest.yFlight = q.y
 
-					-- C_QuestLog.GetQuestTagInfo fields
-					quest.tagId = questTagInfo.tagID
-					quest.worldQuestType = questTagInfo.worldQuestType
-					quest.quality = questTagInfo.quality
-					quest.isElite = questTagInfo.isElite
+					-- C_QuestLog.GetQuestTagInfo fields (cache the table to avoid repeated API calls)
+					if not quest.questTagInfo then
+						quest.questTagInfo = questTagInfo
+						quest.tagId = questTagInfo.tagID
+						quest.worldQuestType = questTagInfo.worldQuestType
+						quest.quality = questTagInfo.quality
+						quest.isElite = questTagInfo.isElite
+					end
 
-					title, factionId = C_TaskQuest.GetQuestInfoByQuestID(quest.questID)
-					quest.title = title
-					quest.factionId = factionId
-					if factionId then
-						quest.faction = C_Reputation.GetFactionDataByID(factionId).name
+					-- Title and faction (static per quest, cache after first successful fetch)
+					if not quest.titleCached then
+						title, factionId = C_TaskQuest.GetQuestInfoByQuestID(quest.questID)
+						quest.title = title
+						quest.factionId = factionId
+						if factionId then
+							local factionData = C_Reputation.GetFactionDataByID(factionId)
+							quest.faction = factionData and factionData.name or nil
+						end
+						if title then
+							quest.titleCached = true
+						end
 					end
 					quest.timeLeft = timeLeft
 					quest.bounties = {}
 
-					quest.reward = {}
+					-- Invalidate reward cache if warmode status changed since last cache
+					if quest.rewardCached and quest.cachedWarmode ~= BWQ.warmodeEnabled then
+						quest.rewardCached = false
+					end
+
 					local rewardType = {}
+					if not quest.rewardCached then
+					quest.reward = {}
 					local hasReward = false
-					
+
 					-- item reward
 					if GetNumQuestLogRewards(quest.questID) > 0 then
 						local itemName, itemTexture, quantity, quality, isUsable, itemId = GetQuestLogRewardInfo(1, quest.questID)
@@ -436,7 +454,7 @@ local RetrieveWorldQuests = function(mapId)
 							quest.reward.itemQuantity = quantity
 							quest.reward.itemName = itemName
 							--print(string.format("[BWQ] Quest %s - %s - %s - %s - %s", quest.questID, quest.title, itemName, itemId, quantity))    -- for debugging
-							
+
 							local equipSlot, classId, subClassId
 							local itemInfo = C_Item.GetItemInfo(quest.reward.itemId)
 							if not itemInfo then
@@ -452,6 +470,12 @@ local RetrieveWorldQuests = function(mapId)
 								classId    = itemInfo.classID
 								subClassId = itemInfo.subclassID
 
+								-- Cache item classification for reward cache replay
+								quest.reward.itemClassId = classId
+								quest.reward.itemEquipSlot = equipSlot
+								quest.reward.isConduit = C_Soulbinds.IsItemConduitByItemInfo(itemId) == true
+								quest.reward.isAnima = C_Item.IsAnimaItemByID(itemId) == true
+
 								if classId == 7 then
 									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.PROFESSION and quest.sort or CONSTANTS.SORT_ORDER.PROFESSION
 									if quest.reward.itemId == 124124 then
@@ -463,9 +487,9 @@ local RetrieveWorldQuests = function(mapId)
 									quest.reward.realItemLevel = BWQ:GetItemLevelValueForQuestId(quest.questID)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.GEAR
 									if BWQ:C("showItems") and BWQ:C("showGear") then quest.hide = false end
-								elseif C_Soulbinds.IsItemConduitByItemInfo(itemId) == true then
+								elseif quest.reward.isConduit then
 									if BWQ:C("showConduits") then quest.hide = false end
-								elseif C_Item.IsAnimaItemByID(itemId) == true then
+								elseif quest.reward.isAnima then
 									if BWQ:C("showAnima") then quest.hide = false end
 								elseif itemId == 137642 then -- mark of honor
 									quest.sort = quest.sort > CONSTANTS.SORT_ORDER.ITEM and quest.sort or CONSTANTS.SORT_ORDER.ITEM
@@ -538,18 +562,26 @@ local RetrieveWorldQuests = function(mapId)
 								elseif CONSTANTS.THEWARWITHIN_REPUTATION_CURRENCY_IDS[currencyId] then
 									currency.name = string.format("%s: %d %s", name, currency.amount, REPUTATION)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
+									quest.reward.repConfigKeys = quest.reward.repConfigKeys or {}
+									quest.reward.repConfigKeys[#quest.reward.repConfigKeys+1] = "showTWWReputation"
 									if BWQ:C("showTWWReputation") then quest.hide = false end
 								elseif CONSTANTS.DRAGONFLIGHT_REPUTATION_CURRENCY_IDS[currencyId] then
 									currency.name = string.format("%s: %d %s", name, currency.amount, REPUTATION)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
+									quest.reward.repConfigKeys = quest.reward.repConfigKeys or {}
+									quest.reward.repConfigKeys[#quest.reward.repConfigKeys+1] = "showDFReputation"
 									if BWQ:C("showDFReputation") then quest.hide = false end
 								elseif CONSTANTS.SHADOWLANDS_REPUTATION_CURRENCY_IDS[currencyId] then
 									currency.name = string.format("%s: %d %s", name, currency.amount, REPUTATION)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
+									quest.reward.repConfigKeys = quest.reward.repConfigKeys or {}
+									quest.reward.repConfigKeys[#quest.reward.repConfigKeys+1] = "showSLReputation"
 									if BWQ:C("showSLReputation") then quest.hide = false end
 								elseif CONSTANTS.BFA_REPUTATION_CURRENCY_IDS[currencyId] then
 									currency.name = string.format("%s: %d %s", name, currency.amount, REPUTATION)
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.IRRELEVANT
+									quest.reward.repConfigKeys = quest.reward.repConfigKeys or {}
+									quest.reward.repConfigKeys[#quest.reward.repConfigKeys+1] = "showBFAReputation"
 									if BWQ:C("showBFAReputation") then quest.hide = false end
 								elseif currencyId == 1560 then -- war resources
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.WAR_RESOURCES
@@ -792,7 +824,72 @@ local RetrieveWorldQuests = function(mapId)
 							BWQ.pendingQuestIDs[quest.questID] = true
 						end
 					end
-					
+
+					-- Mark reward data as cached if complete (no pending item loads, no XP-only retry, has actual reward)
+					if hasReward and not quest.reward.pendingItemData and not (quest.reward.xp and not quest.reward.itemId and not quest.reward.money and not quest.reward.honor and not quest.reward.currencies) then
+						quest.rewardCached = true
+						quest.cachedWarmode = BWQ.warmodeEnabled
+						quest.cachedRewardType = rewardType
+					elseif quest.reward.xp and BWQ.updateTries >= 10 then
+						-- XP-only quests that exhausted retries: cache what we have
+						quest.rewardCached = true
+						quest.cachedWarmode = BWQ.warmodeEnabled
+						quest.cachedRewardType = rewardType
+					end
+					end -- if not quest.rewardCached
+
+					if quest.rewardCached and quest.cachedRewardType then
+						rewardType = quest.cachedRewardType
+					end
+
+					-- Replay reward-based visibility from cached data (quest.hide was reset to true above)
+					if quest.rewardCached and quest.reward then
+						local r = quest.reward
+						-- Item visibility (uses cached item classification fields)
+						if r.itemId then
+							local classId = r.itemClassId
+							local equipSlot = r.itemEquipSlot
+							if classId == 7 then
+								if BWQ:C("showItems") and BWQ:C("showCraftingMaterials") then quest.hide = false end
+							elseif (equipSlot and equipSlot ~= "") or r.itemId == 163857 then
+								if BWQ:C("showItems") and BWQ:C("showGear") then quest.hide = false end
+							elseif r.isConduit then
+								if BWQ:C("showConduits") then quest.hide = false end
+							elseif r.isAnima then
+								if BWQ:C("showAnima") then quest.hide = false end
+							elseif r.itemId == 137642 then
+								if BWQ:C("showItems") and BWQ:C("showMarkOfHonor") then quest.hide = false end
+							elseif r.itemId == 163036 then
+								-- polished pet charm (no hide toggle)
+							else
+								if BWQ:C("showItems") and BWQ:C("showOtherItems") then quest.hide = false end
+							end
+						end
+						-- Gold visibility
+						if r.money then
+							if r.money < 1000000 then
+								if BWQ:C("showLowGold") then quest.hide = false end
+							else
+								if BWQ:C("showHighGold") then quest.hide = false end
+							end
+						end
+						-- Currency visibility (table-driven via CONSTANTS.REWARD_TYPE_CONFIG_KEY)
+						for _, rtype in ipairs(rewardType) do
+							local configKey = CONSTANTS.REWARD_TYPE_CONFIG_KEY[rtype]
+							if configKey and BWQ:C(configKey) then quest.hide = false end
+						end
+						-- Reputation currency visibility (stored per-quest since IRRELEVANT is shared)
+						if r.repConfigKeys then
+							for _, configKey in ipairs(r.repConfigKeys) do
+								if BWQ:C(configKey) then quest.hide = false end
+							end
+						end
+						-- XP-only visibility
+						if r.xp and r.xp > 0 and not r.itemId and not r.money and not r.honor and not r.currencies then
+							if BWQ:C("showXP") then quest.hide = false end
+						end
+					end
+
 					for _, bounty in ipairs(BWQ.bounties) do
 						if C_QuestLog.IsQuestCriteriaForBounty(quest.questID, bounty.questID) then
 							quest.bounties[#quest.bounties + 1] = bounty.icon
@@ -1396,6 +1493,11 @@ function BWQ:ScheduleUpdate()
 		C_Timer.After(0.1, function()
 			self.updatePending = false
 			self:UpdateBlock()
+			-- Sync with RunUpdate's throttle so the two paths don't overlap:
+			-- without this, ScheduleUpdate fires UpdateBlock but lastUpdate stays
+			-- stale, allowing QUEST_LOG_UPDATE to immediately trigger RunUpdate
+			-- again, creating a feedback loop when the world map is open.
+			BWQ.lastUpdate = GetTime()
 		end)
 	end
 end
@@ -1403,7 +1505,6 @@ end
 function BWQ:RunUpdate()
 	local currentTime = GetTime()
 	if currentTime - BWQ.lastUpdate > 5 then
-		BWQ.updateTries = 0
 		BWQ.xpOnlyRequested = nil  -- allow re-checking XP-only quests on fresh update cycle
 		BWQ:UpdateBlock()
 		BWQ.lastUpdate = currentTime
@@ -1921,6 +2022,7 @@ function BWQ:AttachToBlock(anchor)
 		BWQ:SetFrameStrata("DIALOG")
 		BWQ:Show()
 
+		BWQ.updateTries = 0
 		BWQ:RunUpdate()
 	end
 end
@@ -1936,6 +2038,8 @@ BWQ:RegisterEvent("PLAYER_ENTERING_WORLD")
 BWQ:RegisterEvent("ADDON_LOADED")
 BWQ:SetScript("OnEvent", function(self, event, arg1)
 	if event == "QUEST_LOG_UPDATE" then
+		-- Skip if a ScheduleUpdate is already in flight — no need to queue another update
+		if BWQ.updatePending then return end
 		-- Detect world map changes without hooking WorldMapFrame:OnMapChanged().
 		-- When the user navigates to a different zone on the world map, OnMapChanged fires
 		-- which triggers QUEST_LOG_UPDATE. If the world map is open and its mapID has changed,
@@ -1957,6 +2061,16 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 				return
 			end
 			BWQ.currentMapId = currentMapId
+			-- Throttle QUEST_LOG_UPDATE when map is open to break the feedback loop:
+			-- tooltip API calls (GetQuestObjectiveInfo, etc.) fire QUEST_LOG_UPDATE,
+			-- which triggers UpdateBlock -> rebuilds row scripts -> next hover fires
+			-- more tooltip calls -> more QUEST_LOG_UPDATE events, ad infinitum.
+			-- By throttling here (before RunUpdate), we prevent the event from being
+			-- a vector for the needsRefresh/ScheduleUpdate retry chain.
+			local now = GetTime()
+			if now - BWQ.lastUpdate < 5 then
+				return
+			end
 		end
 		BWQ:RunUpdate()
 	elseif event == "QUEST_WATCH_LIST_CHANGED" then
@@ -1978,6 +2092,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 	elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
 		BWQ:OnFactionUpdate(arg1)
 	elseif event == "PLAYER_ENTERING_WORLD" then
+		BWQ.updateTries = 0
 		BWQ.slider:SetScript("OnLeave", Block_OnLeave )
 		BWQ.slider:SetScript("OnValueChanged", function(self, value)
 			BWQ:RenderRows()
@@ -2050,6 +2165,7 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 			BWQ.currentMapId = WorldMapFrame:GetMapID()
 			if BWQ:C("attachToWorldMap") then
 				BWQ:AttachToWorldMap()
+				BWQ.updateTries = 0
 				BWQ:RunUpdate()
 			end
 		end)
