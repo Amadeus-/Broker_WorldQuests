@@ -104,6 +104,41 @@ BWQ.buttonSettings.texture:SetTexCoord(0, 0.50, 0, 0.50)
 BWQ.buttonSettings.texture:SetVertexColor(1.0, 0.82, 0, 1.0)
 BWQ.buttonSettings:SetScript("OnClick", function(self) BWQ:OpenConfigMenu(self) end)
 
+BWQ.buttonRefresh = CreateFrame("Button", nil, BWQ, "BackdropTemplate")
+BWQ.buttonRefresh:SetSize(20, 20)
+BWQ.buttonRefresh:SetPoint("TOPLEFT", BWQ, "TOPLEFT", 5, -8)
+BWQ.buttonRefresh:SetBackdrop({bgFile = "Interface\\ChatFrame\\ChatFrameBackground", tile = false, tileSize = 0, edgeSize = 2, insets = { left = 0, right = 0, top = 0, bottom = 0 }, })
+BWQ.buttonRefresh:SetBackdropColor(0.1, 0.1, 0.1)
+BWQ.buttonRefresh.texture = BWQ.buttonRefresh:CreateTexture(nil, "BORDER")
+BWQ.buttonRefresh.texture:SetAllPoints()
+BWQ.buttonRefresh.texture:SetAtlas("UI-RefreshButton")
+BWQ.buttonRefresh:SetScript("OnEnter", function(self)
+	GameTooltip:SetOwner(self, "ANCHOR_TOP")
+	GameTooltip:SetText("Refresh all quest data")
+	GameTooltip:Show()
+end)
+BWQ.buttonRefresh:SetScript("OnLeave", function(self)
+	GameTooltip:Hide()
+end)
+BWQ.buttonRefresh:SetScript("OnClick", function()
+	for _, expacZones in next, BWQ.MAP_ZONES do
+		for mapId, zoneData in next, expacZones do
+			if zoneData.quests then
+				for questID, quest in next, zoneData.quests do
+					quest.rewardCached = false
+					quest.titleCached = false
+					quest.questTagInfo = nil
+				end
+			end
+		end
+	end
+	BWQ.updateTries = 0
+	BWQ.xpOnlyRequested = nil
+	BWQ.lastUpdate = 0
+	BWQ:UpdateBlock()
+	BWQ.lastUpdate = GetTime()
+end)
+
 --==========================================================
 -- Main Window Slider
 --==========================================================

@@ -1,3 +1,7 @@
+### 12.0.1.8
+* Added a refresh button (icon) to the upper-left corner of the panel. Clicking it clears all cached quest data and forces a full update, useful when reward data appears stale.
+* Fixed quests permanently showing XP-only rewards when currency data loaded as an empty table. The cache now correctly identifies these as incomplete and allows re-processing.
+
 ### 12.0.1.7
 ## Performance Updates
 * Cached static quest data in RetrieveWorldQuests. Previously, every update re-fetched all data from the API for every quest. Static data is now cached after the first successful fetch, eliminating ~1,200-1,500 redundant API calls per update. Volatile data (time remaining, visibility filters, reward totals, etc.) continues to refresh on every cycle.

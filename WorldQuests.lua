@@ -826,13 +826,15 @@ local RetrieveWorldQuests = function(mapId)
 					end
 
 					-- Mark reward data as cached if complete (no pending item loads, no XP-only retry, has actual reward)
-					if hasReward and not quest.reward.pendingItemData and not (quest.reward.xp and not quest.reward.itemId and not quest.reward.money and not quest.reward.honor and not quest.reward.currencies) then
+					if hasReward and not quest.reward.pendingItemData and not (quest.reward.xp and not quest.reward.itemId and not quest.reward.money and not quest.reward.honor and not (quest.reward.currencies and #quest.reward.currencies > 0)) then
 						quest.rewardCached = true
 						quest.cachedWarmode = BWQ.warmodeEnabled
 						quest.cachedRewardType = rewardType
 					elseif quest.reward.xp and BWQ.updateTries >= 10 then
-						-- XP-only quests that exhausted retries: cache what we have
-						quest.rewardCached = true
+						-- XP-only quests that exhausted retries: soft-cache so we stop
+						-- retrying this cycle, but allow re-checking on the next fresh
+						-- update cycle (RunUpdate / panel reopen / periodic invalidation).
+						quest.rewardCached = "xp-only"
 						quest.cachedWarmode = BWQ.warmodeEnabled
 						quest.cachedRewardType = rewardType
 					end
@@ -1463,8 +1465,10 @@ function BWQ:SwitchExpansion(expac)
 	BWQ:HideRowsOfInactiveExpansions()
 	BWQ.hasUnlockedWorldQuests = false
 	BWQ.updateTries = 0
+	BWQ.xpOnlyRequested = nil
+	BWQ:InvalidateXPOnlyCache()
 	BWQ:UpdateBlock()
-end 
+end
 
 function BWQ:HideRowsOfInactiveExpansions()
 	for k, expac in next, BWQ.MAP_ZONES do
@@ -1502,10 +1506,26 @@ function BWQ:ScheduleUpdate()
 	end
 end
 
+function BWQ:InvalidateXPOnlyCache()
+	if not BWQ.MAP_ZONES or not BWQ.MAP_ZONES[BWQ.expansion] then return end
+	for mapId, zoneData in next, BWQ.MAP_ZONES[BWQ.expansion] do
+		if zoneData.quests then
+			for questID, quest in next, zoneData.quests do
+				if quest.rewardCached == "xp-only" then
+					quest.rewardCached = false
+				end
+			end
+		end
+	end
+end
+
 function BWQ:RunUpdate()
 	local currentTime = GetTime()
 	if currentTime - BWQ.lastUpdate > 5 then
 		BWQ.xpOnlyRequested = nil  -- allow re-checking XP-only quests on fresh update cycle
+		-- Invalidate soft-cached XP-only quests so they get re-processed with
+		-- potentially-loaded reward data on this fresh cycle.
+		BWQ:InvalidateXPOnlyCache()
 		BWQ:UpdateBlock()
 		BWQ.lastUpdate = currentTime
 	end
@@ -2107,12 +2127,23 @@ BWQ:SetScript("OnEvent", function(self, event, arg1)
 		-- to prevent cascading re-requests for genuinely XP-only quests.
 		if BWQ.pendingQuestIDs and BWQ.pendingQuestIDs[arg1] then
 			BWQ.pendingQuestIDs[arg1] = nil
+			-- Invalidate reward cache for this quest so fresh data gets processed.
+			-- Without this, quests cached as XP-only (the fallback) during the retry
+			-- window would stay permanently stuck even after real data arrives.
+			for _, expacZones in next, BWQ.MAP_ZONES do
+				for mapId, zoneData in next, expacZones do
+					if zoneData.quests and zoneData.quests[arg1] then
+						zoneData.quests[arg1].rewardCached = false
+					end
+				end
+			end
 			BWQ:ScheduleUpdate()
 		end
 	elseif event == "CHAT_MSG_COMBAT_FACTION_CHANGE" then
 		BWQ:OnFactionUpdate(arg1)
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		BWQ.updateTries = 0
+		BWQ:InvalidateXPOnlyCache()
 		BWQ.slider:SetScript("OnLeave", Block_OnLeave )
 		BWQ.slider:SetScript("OnValueChanged", function(self, value)
 			BWQ:RenderRows()
