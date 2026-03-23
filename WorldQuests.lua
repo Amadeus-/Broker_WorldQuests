@@ -1614,7 +1614,7 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|T7505702:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
 		if BWQ:C("brokerShowTheHarati") 			and BWQ.totalTheHarati > 0 				then brokerString = string.format("%s|T7505704:16:16|t %d  ", brokerString, BWQ.totalTheHarati) end
 		if BWQ:C("brokerShowCofferKeyShards") 		and BWQ.totalCofferKeyShards > 0		then brokerString = string.format("%s|TInterface\\Icons\\inv_gizmo_hardenedadamantitetube:16:16|t %d  ", brokerString, BWQ.totalCofferKeyShards) end
-		if BWQ:C("brokerShowSilvermoonCourt") 		and BWQ.totalSilvermoonCourt > 0		then brokerString = string.format("%s|T7505698:16:16|t %d  ", brokerString, BWQ.totalSilvermoonCourt) end
+		if BWQ:C("brokerShowSilvermoonCourt") 		and BWQ.totalSilvermoonCourt > 0		then brokerString = string.format("%s|T7505700:16:16|t %d  ", brokerString, BWQ.totalSilvermoonCourt) end
 
 		-- If necessary, the following command can be used to get the icon IDs above (3354 is an example of the factionID, as found in Constants.lua)
 		-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end

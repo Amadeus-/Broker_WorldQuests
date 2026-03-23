@@ -186,7 +186,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "brokerShowTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "brokerShowTheHarati" },
 					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "brokerShowCofferKeyShards" },
-					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505698"), check = "brokerShowSilvermoonCourt" },
+					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505700"), check = "brokerShowSilvermoonCourt" },
 				}
 				-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
 				-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end
@@ -216,7 +216,7 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "showTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "showTheHarati" },
 					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "showCofferKeyShards" },
-					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505698"), check = "showSilvermoonCourt" },
+					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505700"), check = "showSilvermoonCourt" },
 				}
 			},
 			{ text = "      The War Within", submenu = {
