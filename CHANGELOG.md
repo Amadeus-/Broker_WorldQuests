@@ -1,3 +1,6 @@
+### 12.0.1.9
+* Added support for Silvermoon Court currency
+
 ### 12.0.1.8
 * Added a refresh button (icon) to the upper-left corner of the panel. Clicking it clears all cached quest data and forces a full update, useful when reward data appears stale.
 * Fixed quests permanently showing XP-only rewards when currency data loaded as an empty table. The cache now correctly identifies these as incomplete and allows re-processing.

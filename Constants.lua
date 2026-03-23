@@ -91,6 +91,7 @@ CONSTANTS.REWARD_TYPES = {
 	THE_SINGULARITY = 54,
 	THE_HARATI = 55,
 	COFFER_KEY_SHARDS = 56,
+	SILVERMOON_COURT = 57,
 }
 
 -- Mapping from REWARD_TYPES values to their visibility config key.

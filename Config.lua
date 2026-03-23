@@ -117,7 +117,7 @@ function BWQ:OpenConfigMenu(anchor)
 	MenuUtil.CreateContextMenu(anchor, function(ownerRegion, rootDescription)
 		-- Build options table fresh each time (for dynamic content like isHorde, TomTom)
 		-- If necessary, the following command can be used to get the icon IDs
-		-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID		
+		-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end	
 		local options = {
 			{ text = "Attach list frame to world map", check = "attachToWorldMap" },
 			{ text = "Show list frame on click instead of mouse-over", check = "showOnClick" },
@@ -186,9 +186,10 @@ function BWQ:OpenConfigMenu(anchor)
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "brokerShowTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "brokerShowTheHarati" },
 					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "brokerShowCofferKeyShards" },
+					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505698"), check = "brokerShowSilvermoonCourt" },
 				}
 				-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
-				-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
+				-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end
 			},
 			{ text = "Sort list by time remaining instead of reward type", check = "sortByTimeRemaining" },
 			{ text = "Show 'NEW' text for recently found world quests", check = "showNEWTextWhenAppropriate" },
@@ -208,13 +209,14 @@ function BWQ:OpenConfigMenu(anchor)
 			{ text = ("|T%1$s:16:16|t  Low gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showLowGold" },
 			{ text = ("|T%1$s:16:16|t  High gold reward"):format("Interface\\GossipFrame\\auctioneerGossipIcon"), check = "showHighGold" },
 			-- If necessary, the following command can be used to get the icon IDs  (3354 is an example of the factionID, as found in Constants.lua)
-			-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
+			-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end
 			{ text = "      Midnight", submenu = {
 					{ text = ("|T%1$s:16:16|t  Voidlight Marl"):format("Interface\\Icons\\inv_112_raidtrinkets_voidprism"), check = "showVoidlightMarl" },
 					{ text = ("|T%1$s:16:16|t  The Amani Tribe"):format("7505698"), check = "showTheAmaniTribe" },
 					{ text = ("|T%1$s:16:16|t  The Singularity"):format("7505702"), check = "showTheSingularity" },
 					{ text = ("|T%1$s:16:16|t  The Hara'ti"):format("7505704"), check = "showTheHarati" },
 					{ text = ("|T%1$s:16:16|t  Coffer Key Shards"):format("Interface\\Icons\\inv_gizmo_hardenedadamantitetube"), check = "showCofferKeyShards" },
+					{ text = ("|T%1$s:16:16|t  Silvermoon Court"):format("7505698"), check = "showSilvermoonCourt" },
 				}
 			},
 			{ text = "      The War Within", submenu = {
@@ -451,6 +453,7 @@ BWQ.defaultConfig = {
 		brokerShowTheSingularity = true,
 		brokerShowTheHarati = true,
 		brokerShowCofferKeyShards = true,
+		brokerShowSilvermoonCourt = true,
 	sortByTimeRemaining = false,
 	showNEWTextWhenAppropriate = true,
 	-- reward type
@@ -495,6 +498,7 @@ BWQ.defaultConfig = {
 	showTheSingularity = true,
 	showTheHarati = true,
 	showCofferKeyShards = true,
+	showSilvermoonCourt = true,
 	showItems = true,
 		showGear = true,
 		showRelics = true,

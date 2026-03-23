@@ -768,7 +768,11 @@ local RetrieveWorldQuests = function(mapId)
 								elseif currencyId == 3310 then -- Coffer Key Shards
 									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.COFFER_KEY_SHARDS
 									quest.reward.CofferKeyShardsAmount = currency.amount
-									if BWQ:C("showCofferKeyShards") then quest.hide = false end		
+									if BWQ:C("showCofferKeyShards") then quest.hide = false end
+								elseif currencyId == 3365 then -- Silvermoon Court
+									rewardType[#rewardType+1] = CONSTANTS.REWARD_TYPES.SILVERMOON_COURT
+									quest.reward.SilvermoonCourtAmount = currency.amount
+									if BWQ:C("showSilvermoonCourt") then quest.hide = false end										
 								else 
 									if BWQcfg.spewDebugInfo then print(string.format("[BWQ] Unhandled currency: ID %s", currencyId)) end
 								end
@@ -1111,6 +1115,8 @@ local RetrieveWorldQuests = function(mapId)
 									BWQ.totalTheHarati = BWQ.totalTheHarati + quest.reward.TheHaratiAmount
 								elseif rtype == CONSTANTS.REWARD_TYPES.COFFER_KEY_SHARDS then
 									BWQ.totalCofferKeyShards = BWQ.totalCofferKeyShards + quest.reward.CofferKeyShardsAmount
+								elseif rtype == CONSTANTS.REWARD_TYPES.SILVERMOON_COURT then
+									BWQ.totalSilvermoonCourt = BWQ.totalSilvermoonCourt + quest.reward.SilvermoonCourtAmount
 								end
 							end
 						end
@@ -1311,7 +1317,7 @@ function BWQ:UpdateQuestData()
 	BWQ.totalPolishedPetCharms, BWQ.totalCouncilofDornogal, BWQ.totalTheWeaver, BWQ.totalTheGeneral, BWQ.totalTheVizier = 0, 0, 0, 0, 0
 	BWQ.totalXP, BWQ.totalBronzeCelebrationToken, BWQ.totalWeatheredUndermineCrest, BWQ.totalCarvedUndermineCrest, BWQ.totalTheCartelsOfUndermine = 0, 0, 0, 0, 0
 	BWQ.totalTheBilgewaterCartel, BWQ.totalTheBlackwaterCartel, BWQ.totalTheSteamwheedleCartel, BWQ.totalTheVentureCompany, BWQ.totalWeatheredEtherealCrest = 0, 0, 0, 0, 0
-	BWQ.totalVoidlightMarl, BWQ.totalTheAmaniTribe, BWQ.totalTheSingularity, BWQ.totalTheHarati, BWQ.totalCofferKeyShards = 0, 0, 0, 0, 0
+	BWQ.totalVoidlightMarl, BWQ.totalTheAmaniTribe, BWQ.totalTheSingularity, BWQ.totalTheHarati, BWQ.totalSilvermoonCourt, BWQ.totalCofferKeyShards = 0, 0, 0, 0, 0, 0
 	BWQ.totalTwilightsBladeInsignia = 0
 
 	for mapId in next, BWQ.MAP_ZONES[BWQ.expansion] do
@@ -1608,9 +1614,10 @@ function BWQ:UpdateBlock()
 		if BWQ:C("brokerShowTheSingularity") 		and BWQ.totalTheSingularity > 0 		then brokerString = string.format("%s|T7505702:16:16|t %d  ", brokerString, BWQ.totalTheSingularity) end
 		if BWQ:C("brokerShowTheHarati") 			and BWQ.totalTheHarati > 0 				then brokerString = string.format("%s|T7505704:16:16|t %d  ", brokerString, BWQ.totalTheHarati) end
 		if BWQ:C("brokerShowCofferKeyShards") 		and BWQ.totalCofferKeyShards > 0		then brokerString = string.format("%s|TInterface\\Icons\\inv_gizmo_hardenedadamantitetube:16:16|t %d  ", brokerString, BWQ.totalCofferKeyShards) end
+		if BWQ:C("brokerShowSilvermoonCourt") 		and BWQ.totalSilvermoonCourt > 0		then brokerString = string.format("%s|T7505698:16:16|t %d  ", brokerString, BWQ.totalSilvermoonCourt) end
 
 		-- If necessary, the following command can be used to get the icon IDs above (3354 is an example of the factionID, as found in Constants.lua)
-		-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
+		-- > /run local info = C_CurrencyInfo.GetCurrencyInfo(3354); if info then print(info.iconFileID) else print("nil") end
 
 		if brokerString and brokerString ~= "" then
 			BWQ.WorldQuestsBroker.text = brokerString
