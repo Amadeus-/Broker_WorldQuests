@@ -114,6 +114,7 @@ BWQ.buttonRefresh.texture:SetAllPoints()
 BWQ.buttonRefresh.texture:SetAtlas("UI-RefreshButton")
 BWQ.buttonRefresh:SetScript("OnEnter", function(self)
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	if GameTooltip.ItemTooltip then GameTooltip.ItemTooltip:Hide() end
 	GameTooltip:SetText("Refresh all quest data")
 	GameTooltip:Show()
 	GameTooltip:SetScale(0.6)
