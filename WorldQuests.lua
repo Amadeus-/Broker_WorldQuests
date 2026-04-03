@@ -131,6 +131,7 @@ function BWQ:GetArtifactPowerValue(itemId)
 	local isArtifactPower = false
 	for i = 2, numLines do
 		local text = _G["BWQScanTooltipTextLeft" .. i]:GetText()
+		if issecretvalue and issecretvalue(text) then text = nil end
 
 		if text then
 			if text:find(ARTIFACT_POWER) then
@@ -166,6 +167,7 @@ function BWQ:GetItemLevelValueForQuestId(questID)
 	local numLines = BWQ.ScanTooltip:NumLines()
 	for i = 2, numLines do
 		local text = _G["BWQScanTooltipTextLeft" .. i]:GetText()
+		if issecretvalue and issecretvalue(text) then text = nil end
 		local e = ITEM_LEVEL_PLUS:find("%%d")
 		if text and text:find(ITEM_LEVEL_PLUS:sub(1, e - 1)) then
 			return text:match("%d+%+?") or ""
@@ -1217,7 +1219,7 @@ local RetrieveWorldQuests = function(mapId)
 						for j, widget in pairs(widgets) do
 							if widget.widgetType == Enum.UIWidgetVisualizationType.TextWithState then
 								local widgetInfo = C_UIWidgetManager.GetTextWithStateWidgetVisualizationInfo(widget.widgetID)
-								if widgetInfo then
+								if widgetInfo and not (issecretvalue and issecretvalue(widgetInfo.text)) then
 									if string.find(widgetInfo.text, "Time Left:") then
 										local timeLeftStr = string.match(widgetInfo.text, "Time Left:%s*(.+)")
 
