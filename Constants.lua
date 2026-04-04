@@ -6,7 +6,8 @@ CONSTANTS.EXPANSIONS = {
 	BFA = "BFA",
 	SHADOWLANDS = "SHADOWLANDS",
 	DRAGONFLIGHT = "DRAGONFLIGHT",
-	THEWARWITHIN = "THEWARWITHIN"
+	THEWARWITHIN = "THEWARWITHIN",
+	MIDNIGHT = "MIDNIGHT"
 }
 CONSTANTS.FACTIONS = {
 	NEUTRAL = 0,
@@ -18,6 +19,7 @@ CONSTANTS.MAPID_KUL_TIRAS = 876
 CONSTANTS.MAPID_DALARAN_BROKEN_ISLES = 627
 
 CONSTANTS.SORT_ORDER = {
+	XP = 9,
 	ARTIFACTPOWER = 8,
 	RESOURCES = 7,
 	HONOR = 6,
@@ -26,17 +28,6 @@ CONSTANTS.SORT_ORDER = {
 	ITEM = 3,
 	PROFESSION = 2,
 	MONEY = 1,
-}
-
-CONSTANTS.WORLD_QUEST_TYPES = {
-	PROFESSION = 1,
-	PVE = 2,
-	PVP = 3,
-	PETBATTLE = 4,
-	-- ?? = 5,
-	DUNGEON = 6,
-	INVASION = 7,
-	RAID = 8,
 }
 
 -- The name here should match the currency name in game (verified via Wowhead).  Some currencies are singular, some are plural.
@@ -80,6 +71,84 @@ CONSTANTS.REWARD_TYPES = {
 	HALLOWFALL_ARATHI = 34,
 	VALORSTONES = 35,
 	KEJ = 36,
+	COUNCIL_OF_DORNOGAL = 37,
+	THE_WEAVER = 38,
+	THE_GENERAL = 39,
+	THE_VIZIER = 40,
+	XP = 41,
+	BRONZE_CELEBRATION_TOKEN = 42,
+	WEATHERED_UNDERMINE_CREST = 43,
+	CARVED_UNDERMINE_CREST = 44,
+	THE_CARTELS_OF_UNDERMINE = 45,
+	THE_BILGEWATER_CARTEL = 46,
+	THE_BLACKWATER_CARTEL = 47,
+	THE_STEAMWHEEDLE_CARTEL = 48,
+	THE_VENTURE_COMPANY = 49,
+	WEATHERED_ETHEREAL_CREST = 50,
+	TWILIGHTS_BLADE_INSIGNIA = 51,
+	VOIDLIGHT_MARL = 52,
+	THE_AMANI_TRIBE = 53,
+	THE_SINGULARITY = 54,
+	THE_HARATI = 55,
+	COFFER_KEY_SHARDS = 56,
+	SILVERMOON_COURT = 57,
+}
+
+-- Mapping from REWARD_TYPES values to their visibility config key.
+-- Used by the reward cache replay to re-evaluate quest visibility from cached data
+-- without re-calling APIs. When adding a new currency reward type, add its config key here too.
+CONSTANTS.REWARD_TYPE_CONFIG_KEY = {
+	[CONSTANTS.REWARD_TYPES.ARTIFACTPOWER] = "showArtifactPower",
+	[CONSTANTS.REWARD_TYPES.WAR_RESOURCES] = "showWarResources",
+	[CONSTANTS.REWARD_TYPES.SERVICE_MEDAL] = "showBFAServiceMedals",
+	[CONSTANTS.REWARD_TYPES.RESOURCES] = "showResources",
+	[CONSTANTS.REWARD_TYPES.LEGIONFALL_SUPPLIES] = "showLegionfallSupplies",
+	[CONSTANTS.REWARD_TYPES.NETHERSHARD] = "showNethershards",
+	[CONSTANTS.REWARD_TYPES.ARGUNITE] = "showArgunite",
+	[CONSTANTS.REWARD_TYPES.WAKENING_ESSENCE] = "showWakeningEssences",
+	[CONSTANTS.REWARD_TYPES.PRISMATIC_MANAPEARL] = "showPrismaticManapearl",
+	[CONSTANTS.REWARD_TYPES.CYPHERS_OF_THE_FIRST_ONES] = "showCyphersOfTheFirstOnes",
+	[CONSTANTS.REWARD_TYPES.GRATEFUL_OFFERING] = "showGratefulOffering",
+	[CONSTANTS.REWARD_TYPES.BLOODY_TOKENS] = "showBloodyTokens",
+	[CONSTANTS.REWARD_TYPES.DRAGON_ISLES_SUPPLIES] = "showDragonIslesSupplies",
+	[CONSTANTS.REWARD_TYPES.ELEMENTAL_OVERFLOW] = "showElementalOverflow",
+	[CONSTANTS.REWARD_TYPES.FLIGHTSTONES] = "showFlightstones",
+	[CONSTANTS.REWARD_TYPES.WHELPLINGS_DREAMING_CREST] = "showWhelplingsDreamingCrest",
+	[CONSTANTS.REWARD_TYPES.DRAKES_DREAMING_CREST] = "showDrakesDreamingCrest",
+	[CONSTANTS.REWARD_TYPES.WYRMS_DREAMING_CREST] = "showWyrmsDreamingCrest",
+	[CONSTANTS.REWARD_TYPES.ASPECTS_DREAMING_CREST] = "showAspectsDreamingCrest",
+	[CONSTANTS.REWARD_TYPES.WHELPLINGS_AWAKENED_CREST] = "showWhelplingsAwakenedCrest",
+	[CONSTANTS.REWARD_TYPES.DRAKES_AWAKENED_CREST] = "showDrakesAwakenedCrest",
+	[CONSTANTS.REWARD_TYPES.WYRMS_AWAKENED_CREST] = "showWyrmsAwakenedCrest",
+	[CONSTANTS.REWARD_TYPES.ASPECTS_AWAKENED_CREST] = "showAspectsAwakenedCrest",
+	[CONSTANTS.REWARD_TYPES.MYSTERIOUS_FRAGMENT] = "showMysteriousFragment",
+	[CONSTANTS.REWARD_TYPES.RESONANCE_CRYSTALS] = "showResonanceCrystals",
+	[CONSTANTS.REWARD_TYPES.THE_ASSEMBLY_OF_THE_DEEPS] = "showTheAssemblyoftheDeeps",
+	[CONSTANTS.REWARD_TYPES.HALLOWFALL_ARATHI] = "showHallowfallArathi",
+	[CONSTANTS.REWARD_TYPES.VALORSTONES] = "showValorstones",
+	[CONSTANTS.REWARD_TYPES.KEJ] = "showKej",
+	[CONSTANTS.REWARD_TYPES.COUNCIL_OF_DORNOGAL] = "showCouncilofDornogal",
+	[CONSTANTS.REWARD_TYPES.THE_WEAVER] = "showTheWeaver",
+	[CONSTANTS.REWARD_TYPES.THE_GENERAL] = "showTheGeneral",
+	[CONSTANTS.REWARD_TYPES.THE_VIZIER] = "showTheVizier",
+	[CONSTANTS.REWARD_TYPES.BRONZE_CELEBRATION_TOKEN] = "showBronzeCelebrationToken",
+	[CONSTANTS.REWARD_TYPES.WEATHERED_UNDERMINE_CREST] = "showWeatheredUndermineCrest",
+	[CONSTANTS.REWARD_TYPES.TWILIGHTS_BLADE_INSIGNIA] = "showTwilightsBladeInsignia",
+	[CONSTANTS.REWARD_TYPES.CARVED_UNDERMINE_CREST] = "showCarvedUndermineCrest",
+	[CONSTANTS.REWARD_TYPES.THE_CARTELS_OF_UNDERMINE] = "showTheCartelsOfUndermine",
+	[CONSTANTS.REWARD_TYPES.THE_BILGEWATER_CARTEL] = "showTheBilgewaterCartel",
+	[CONSTANTS.REWARD_TYPES.THE_BLACKWATER_CARTEL] = "showTheBlackwaterCartel",
+	[CONSTANTS.REWARD_TYPES.THE_STEAMWHEEDLE_CARTEL] = "showTheSteamwheedleCartel",
+	[CONSTANTS.REWARD_TYPES.THE_VENTURE_COMPANY] = "showTheVentureCompany",
+	[CONSTANTS.REWARD_TYPES.WEATHERED_ETHEREAL_CREST] = "showWeatheredEtherealCrest",
+	[CONSTANTS.REWARD_TYPES.VOIDLIGHT_MARL] = "showVoidlightMarl",
+	[CONSTANTS.REWARD_TYPES.THE_AMANI_TRIBE] = "showTheAmaniTribe",
+	[CONSTANTS.REWARD_TYPES.THE_SINGULARITY] = "showTheSingularity",
+	[CONSTANTS.REWARD_TYPES.THE_HARATI] = "showTheHarati",
+	[CONSTANTS.REWARD_TYPES.COFFER_KEY_SHARDS] = "showCofferKeyShards",
+	[CONSTANTS.REWARD_TYPES.SILVERMOON_COURT] = "showSilvermoonCourt",
+	[CONSTANTS.REWARD_TYPES.HONOR] = "showHonor",
+	[CONSTANTS.REWARD_TYPES.XP] = "showXP",
 }
 
 CONSTANTS.QUEST_TYPES = {
@@ -89,32 +158,47 @@ CONSTANTS.QUEST_TYPES = {
 	SKINNING = 3,
 }
 
-local isHorde = UnitFactionGroup("player") == "Horde"
+-- Use Texture Atlas Viewer addon (/tav) to find these values.
+-- Search for "World" (World Quest) for most of these.
+-- (Note:  "N/A" means that it does not use a special icon.)
 CONSTANTS.WORLD_QUEST_ICONS_BY_TAG_ID = {
-	[116] = "worldquest-icon-blacksmithing",
-	[117] = "worldquest-icon-leatherworking",
-	[118] = "worldquest-icon-alchemy",
-	[119] = "worldquest-icon-herbalism",
-	[120] = "worldquest-icon-mining",
-	[122] = "worldquest-icon-engineering",
-	[123] = "worldquest-icon-enchanting",
-	[125] = "worldquest-icon-jewelcrafting",
-	[126] = "worldquest-icon-inscription",
-	[129] = "worldquest-icon-archaeology",
-	[130] = "worldquest-icon-fishing",
-	[131] = "worldquest-icon-cooking",
-	[121] = "worldquest-icon-tailoring",
-	[124] = "worldquest-icon-skinning",
-	[137] = "worldquest-icon-dungeon",
-	[113] = "worldquest-icon-pvp-ffa",
-	[115] = "worldquest-icon-petbattle",
-	[111] = "worldquest-questmarker-dragon",
-	[112] = "worldquest-questmarker-dragon",
-	[136] = "worldquest-questmarker-dragon",
-	[139] = "worldquest-icon-burninglegion",
-	[142] = "worldquest-icon-burninglegion",
-	[259] = isHorde and "worldquest-icon-horde" or "worldquest-icon-alliance",
-	[260] = isHorde and "worldquest-icon-horde" or "worldquest-icon-alliance",
+	[-1]  = { icon = "worldquest-Capstone-questmarker-epic-Locked" },
+	[109] = { icon = "N/A" },
+	[111] = { icon = "worldquest-questmarker-dragon" },
+	[112] = { icon = "worldquest-questmarker-dragon" },
+	[113] = { icon = "worldquest-icon-pvp-ffa" },
+	[115] = { icon = "worldquest-icon-petbattle" },
+	[116] = { icon = "worldquest-icon-blacksmithing" },
+	[117] = { icon = "worldquest-icon-leatherworking" },
+	[118] = { icon = "worldquest-icon-alchemy" },
+	[119] = { icon = "worldquest-icon-herbalism" },
+	[120] = { icon = "worldquest-icon-mining" },
+	[121] = { icon = "worldquest-icon-tailoring" },
+	[122] = { icon = "worldquest-icon-engineering" },
+	[123] = { icon = "worldquest-icon-enchanting" },
+	[124] = { icon = "worldquest-icon-skinning" },
+	[125] = { icon = "worldquest-icon-jewelcrafting" },
+	[126] = { icon = "worldquest-icon-inscription" },
+	[129] = { icon = "worldquest-icon-archaeology" },
+	[130] = { icon = "worldquest-icon-fishing" },
+	[131] = { icon = "worldquest-icon-cooking" },
+	[135] = { icon = "N/A" },
+	[136] = { icon = "worldquest-questmarker-dragon" },
+	[137] = { icon = "worldquest-icon-dungeon" },
+	[139] = { icon = "worldquest-icon-burninglegion" },
+	[141] = { icon = "worldquest-icon-raid", border = "worldquest-questmarker-dragon" },
+	[142] = { icon = "worldquest-icon-burninglegion" },
+	[144] = { icon = "worldquest-icon-boss", border = "worldquest-questmarker-dragon-silver"  },
+	[145] = { icon = "worldquest-icon-dungeon" },
+	[151] = { icon = "N/A" },
+	[152] = { icon = "N/A" },
+	[259] = { icon = UnitFactionGroup("player") == "Horde" and "worldquest-icon-horde" or "worldquest-icon-alliance" },
+	[260] = { icon = UnitFactionGroup("player") == "Horde" and "worldquest-icon-horde" or "worldquest-icon-alliance" },
+	[278] = { icon = "worldquest-icon-pvp-ffa", border = "worldquest-questmarker-dragon" },
+	[281] = { icon = "worldquest-icon-race" },
+	[286] = { icon = "worldquest-Capstone-questmarker-epic-Toast", border = "worldquest-questmarker-dragon" },
+	[289] = { icon = "worldquest-icon-boss", border = "worldquest-questmarker-dragon-silver"  },
+	[295] = { icon = "worldquest-Prey-Crystal" },
 }
 
 CONSTANTS.CURRENCIES_AFFECTED_BY_WARMODE = {
@@ -128,9 +212,21 @@ CONSTANTS.CURRENCIES_AFFECTED_BY_WARMODE = {
 	[2123] = true, -- Bloody Tokens (dragonflight)
 }
 
+-- If necessary, the following command can be used to get the icon IDs
+-- > /dump C_CurrencyInfo.GetCurrencyInfo(3354).iconFileID
+CONSTANTS.MIDNIGHT_REPUTATION_CURRENCY_IDS = {
+	[3354] = true, -- The Amani Tribe
+	[3389] = true, -- The Singularity
+	[3370] = true, -- The Hara'ti
+}
+
 CONSTANTS.THEWARWITHIN_REPUTATION_CURRENCY_IDS = {
 	[2902] = true, -- The Assembly of the Deeps
 	[2899] = true, -- Hallowfall Arathi
+	[2897] = true, -- Council of Dornogal
+	[3002] = true, -- The Weaver
+	[3003] = true, -- The General
+	[3004] = true, -- The Vizier
 }
 
 CONSTANTS.DRAGONFLIGHT_REPUTATION_CURRENCY_IDS = {
@@ -191,6 +287,7 @@ CONSTANTS.FAMILY_FAMILIAR_QUEST_IDS = { -- WQ pet battle achievement
 
 CONSTANTS.ACHIEVEMENT_IDS = {
 	PET_BATTLE_WQ = {
+		[CONSTANTS.EXPANSIONS.MIDNIGHT] = 0,				-- there doesn't appear to be a pet battle achievement for Midnight?  Perhaps this functionality needs to be removed?
 		[CONSTANTS.EXPANSIONS.THEWARWITHIN] = 40153,
 		[CONSTANTS.EXPANSIONS.DRAGONFLIGHT] = 16464,
 		[CONSTANTS.EXPANSIONS.SHADOWLANDS] = 14625,
@@ -383,6 +480,36 @@ CONSTANTS.PARAGON_FACTIONS = {
 		[2902] = "ui_majorfactions_candle", -- The Assembly of the Deeps
 		[2899] = "ui_majorfactions_flame", -- Hallowfall Arathi
 	},
+	midnight = {
+		order = { },
+	},
 }
 
 addon.CONSTANTS = CONSTANTS
+
+--[[  FOR REFERENCE 
+--------------------
+Name = "QuestTagType",
+	Fields =
+	{
+		{ Name = "Tag", Type = "QuestTagType", EnumValue = 0 },
+		{ Name = "Profession", Type = "QuestTagType", EnumValue = 1 },
+		{ Name = "Normal", Type = "QuestTagType", EnumValue = 2 },
+		{ Name = "PvP", Type = "QuestTagType", EnumValue = 3 },
+		{ Name = "PetBattle", Type = "QuestTagType", EnumValue = 4 },
+		{ Name = "Bounty", Type = "QuestTagType", EnumValue = 5 },
+		{ Name = "Dungeon", Type = "QuestTagType", EnumValue = 6 },
+		{ Name = "Invasion", Type = "QuestTagType", EnumValue = 7 },
+		{ Name = "Raid", Type = "QuestTagType", EnumValue = 8 },
+		{ Name = "Contribution", Type = "QuestTagType", EnumValue = 9 },
+		{ Name = "RatedReward", Type = "QuestTagType", EnumValue = 10 },
+		{ Name = "InvasionWrapper", Type = "QuestTagType", EnumValue = 11 },
+		{ Name = "FactionAssault", Type = "QuestTagType", EnumValue = 12 },
+		{ Name = "Islands", Type = "QuestTagType", EnumValue = 13 },
+		{ Name = "Threat", Type = "QuestTagType", EnumValue = 14 },
+		{ Name = "CovenantCalling", Type = "QuestTagType", EnumValue = 15 },
+		{ Name = "DragonRiderRacing", Type = "QuestTagType", EnumValue = 16 },
+		{ Name = "Capstone", Type = "QuestTagType", EnumValue = 17 },
+		{ Name = "WorldBoss", Type = "QuestTagType", EnumValue = 18 },
+	}
+]]

@@ -1,3 +1,187 @@
+### 12.0.1.9
+* Added support for Silvermoon Court currency
+
+### 12.0.1.8
+* Added a refresh button (icon) to the upper-left corner of the panel. Clicking it clears all cached quest data and forces a full update, useful when reward data appears stale.
+* Fixed quests permanently showing XP-only rewards when currency data loaded as an empty table. The cache now correctly identifies these as incomplete and allows re-processing.
+* Increased the size of the icons at the top of the window slightly.
+
+### 12.0.1.7
+## Performance Updates
+* Cached static quest data in RetrieveWorldQuests. Previously, every update re-fetched all data from the API for every quest. Static data is now cached after the first successful fetch, eliminating ~1,200-1,500 redundant API calls per update. Volatile data (time remaining, visibility filters, reward totals, etc.) continues to refresh on every cycle.
+* Fixed infinite update retry loop when the world map is open. The retry counter was being reset every 5 seconds by passive QUEST_LOG_UPDATE events, preventing the retry chain from capping out. Now only user-initiated actions reset the retry counter, and redundant updates are skipped when one is already pending.
+* Coalesced event-driven update triggers to prevent cascading rebuilds. Events like GET_ITEM_INFO_RECEIVED and QUEST_DATA_LOAD_RESULT previously triggered a full UI rebuild per quest on cold login, causing CPU spikes. All event-driven updates are now batched into a single deferred call, significantly reducing CPU usage during login and zone transitions.
+* Removed per-frame bounty tooltip rebuild. Previously, hovering a bounty icon caused the tooltip to be reconstructed every frame via UpdateTooltip. The tooltip is now built once on mouse enter, eliminating a significant source of continuous CPU usage during hover.
+* Split UpdateBlock into data collection and UI rendering phases. UI construction and layout now only runs when the frame is actually visible. When hidden, data and broker text are updated but UI rendering is deferred until the frame is next shown.
+* Replaced full data rebuild on quest watch/tracking changes with a lightweight visual refresh. Previously, toggling quest tracking triggered a complete rebuild of all zone data and the retry chain, causing sustained CPU spikes. Now only the tracking icon on visible buttons is updated.
+
+### 12.0.1.6
+* Added support for Coffer Key Shards currency
+* Added: "Disable shift-click tracking and world map 'bouncing red arrow'" setting that disables quest row shift-click action and also disables the "red arrow" on the main map. When enabled, the only click functionality is that when you left click a quest, the main map will open to that zone. (Tooltips and all visual features remain fully functional.) This is currently OFF by default.
+* Fixed: GameTooltip taint errors when hovering world quest pins on the map. 
+* Replaced shared GameTooltip with a private tooltip to prevent taint propagation. 
+* Switched map navigation to use OpenWorldMap() API and deferred arrow overlay frame creation to first use.
+* Fixed: EventRegistry callback owner key taint leak that could taint world map pins even without clicking quest rows. Switched to anonymous owner keys via RegisterCallbackWithHandle.
+
+### 12.0.1.5
+* Fixed icons not displaying for several entries in the settings menu
+* Fixed icons not displaying for Midnight factions and Twilight's Blade Insignia in settings menu and broker text
+* Fixed tooltip taint issues that could cause errors when interacting with world map quest pins
+* **KNOWN BUGS**:
+  * There are still taint issues that are being worked on, but this version should be better than the last one.
+
+### 12.0.1.4
+* Improved quest reward loading: rewards now appear faster on login instead of showing XP placeholders
+* Fixed a bug where a single uncached item could prevent an entire zone's quests from displaying
+* Reduced taint issues causing tooltip errors when hovering world quest pins on the map
+* **KNOWN BUGS**:
+  * Sometimes the window may "flash", showing all the rewards as XP rewards only.  This is a side effect of the fix mentioned above.  It should hopefully be fixed next release.
+  * There are still taint issues that are being worked on, but this should be a little better.
+
+### 12.0.1.3
+* Added support for Silvermoon City
+* Fixed world quests appearing duplicated under both parent and child zone headers (e.g. Voidstorm and Slayer's Rise)
+* Added support for "Prey" quests.
+
+### 12.0.1.2
+* Added support for Slayer's Rise (the northern part of Voidstorm)
+* Added support for The Hara'ti currency/reputation
+* Fixed miscellaneous taint and secret value errors for WoW 12.0.0+ compatibility
+
+### 12.0.1.1
+* Added support for Midnight Expansion including the first 4 zones and first 3 currencies
+* Fixed bounty tooltip crash during combat caused by secret value taint in 12.0.0+
+* Added support for Midnight pre-patch (Legion) world quests, etc. (contributed by yoshimo)
+
+### 12.0.0.2
+* Added support for Twighlight Highlands (Midnight Pre-patch)
+* Added support for Twilight's Blade Insignia currency
+
+### 12.0.0.1
+* Migrated configuration menu from deprecated UIDropDownMenu to modern MenuUtil.CreateContextMenu API for WoW 12.0.1+ compatibility
+
+### 12.0.0.0
+* Initial updates to support 12.0.0.0
+
+### 11.2.5.0
+* Added support for the "raid" world quest icon in Broken Isles
+* Updated TOC for 11.2.5
+
+### 11.2.0.0
+* Added support for K'aresh (TWW)
+* Added support for Tazavesh (TWW)
+* Added support for Weathered Ethereal Crest currency
+
+### 11.1.0.2
+* Added support for The Bilgewater Cartel reputation currency
+* Added support for The Blackwater Cartel reputation currency
+* Added support for The Steamwheedle Cartel reputation currency
+* Added support for The Venture Company reputation currency
+
+### 11.1.0.1
+* Added support for Weathered Undermine Crest currency
+* Added support for Carved Undermine Crest currency
+* Added support for The Cartels of Undermine reputation currency
+
+### 11.1.0.0
+* Added support for Undermine (TWW)
+
+### 11.0.7.0
+* Added support for Siren Isle (TWW)
+* Added icon for world quests that involve Legion world bosses (quest TagID 144)
+
+### 11.0.5.2
+* Added support for Bronze Celebration Token currency
+
+### 11.0.5.1
+* Fixed error caused by recent World of Warcraft patch.
+
+### 11.0.5.0
+* Added functionality to allow for multiple icons. In other words, for the "boss"
+  type world quests, it can show the skull icon surrounded by the silver dragon.
+  (This update is purely cosmetic.)
+* There is now a configuration setting labeled "Show 'NEW' text for recently found
+  world quests".  It defaults to ON (checked), since that's how the addon has always
+  worked.  But, if you prefer not to see the "NEW" text at the beginning of lines,
+  you can toggle this setting.  This is likely more useful for those who are switching
+  between expansions regularly and don't want to see everything listed as "NEW" every
+  time the switch is made.
+
+### 11.0.2.21
+* Fixed bug with the quest icons
+
+### 11.0.2.20
+* The addon will now automatically change expansions if you zone into a zone
+  associated with that expansion (including when you first enter the game).  This
+  should make things easier for those playing alts or who are still completing 
+  world quests in past expansions for achievements, etc.  If you dislike this feature,
+  you can disable it in the settings -- look for "Auto switch expansions based on 
+  current zone".
+* The "Time Remaining" column will now give the remaining time in days/hours for 
+  any quest with more than one day remaining, hours/minutes for any quest with more
+  than one hour remaining, and just minutes for any quest with less than one hour
+  remaining.  (The coloring logic has not changed.)
+  
+### 11.0.2.19
+* Tom Tom is now an optional dependency (i.e., the Tom Tom addon is 
+  no longer required.)
+* TWW Epic PvP type world quests now have the pvp icon at the front
+  of the row, similar to pet battles, etc.
+
+### 11.0.2.18
+* Added support for City of Threads World Quests
+
+### 11.0.2.17
+* Fixed bug:  https://github.com/Amadeus-/Broker_WorldQuests/issues/21
+
+### 11.0.2.16
+* Fixed a bug with the "attach list frame to world map" feature as described at
+  https://github.com/Amadeus-/Broker_WorldQuests/issues/20
+
+### 11.0.2.15
+* When enabled in settings, the Tom Tom waypoints support feature will now "add"
+  waypoints rather than just adding/removing a single waypoint.
+* TWW Epic Boss type world quests now have the appropriate icon at the front
+  of the row, similar to pet battles, etc.
+* Fixed a bug that was introduced in version 11.0.2.13.
+* Now that Bloody Tokens are also part of the TWW expansion, the filter settings
+  for that currency has been moved next to "Honor".
+
+### 11.0.2.14
+* The locked "Special Assignment" (Capstone) world quests are now included. While
+  locked, what's provided by the addon is primarily informational. Once unlocked, then
+  it becomes like any other world quest. 
+* Dragon Rider Racing type world quests now have the appropriate icon at the front
+  of the row, similar to pet battles, etc.
+* Updated settings options:
+  * Added new option to filter out Dragon Rider Racing type world quests.  It's 
+    under "Filter by type".
+  * Moved the filter setting for "Bloody Tokens" to within the Dragon Isles section.
+  * Added new checkbox option (at the bottom of the list) to enable/disable
+    "Spew Debug Information".  This is intended for use by those working on the 
+    addon and should be unchecked for most users unless requested by a developer.
+
+### 11.0.2.13
+* Added support for world quests that only provide information regarding
+  an XP reward to the addon API. In other words, there are world quests that
+  have a line of blue text when you inspect it, "Awards a one-time Warband
+  reputation bonus", but the addon API provides no other information about it.
+  So, long story short, for these particular quests, the broker window will only
+  show how much XP it provides.
+* Began the process of cleaning up the source to be easier to read, consolidate 
+  local variables together, avoid using local variables that aren't needed, etc.
+  There will be a lot of line changes, but this (and future similar changes) will
+  not affect functionality unless it's described in this file.
+
+### 11.0.2.12
+* Added support for The Weaver, The General, and The Vizier currencies
+
+### 11.0.2.11
+* Fixed shift-clicking rows to set quest tracker
+
+### 11.0.2.10
+* Added support for Council of Dornogal currency
+
 ### 11.0.2.9
 * Fixed currencies being incorrect or showing as zero.
 * Increased the max width of the BWQ window.
